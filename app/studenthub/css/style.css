@@ -1,0 +1,17 @@
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+#content {
+  height: 100%;
+}
+
+.studentHubShell {
+  height: 100%;
+}
+
+.detailIconButton {
+  min-width: 2.5rem;
+}

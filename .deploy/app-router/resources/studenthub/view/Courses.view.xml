@@ -1,0 +1,39 @@
+<mvc:View
+  controllerName="studenthub.nov.controller.Courses"
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns:m="sap.m"
+  displayBlock="true">
+
+  <m:Page id="coursesPage" title="{i18n>coursesTitle}" showNavButton="true" navButtonPress="onNavBack" class="studentHubShell">
+    <m:content>
+      <m:Table id="coursesTable" width="100%" growing="true" items="{path: '/Courses'}" noDataText="No courses found">
+        <m:headerToolbar>
+          <m:OverflowToolbar>
+            <m:Title text="Courses" level="H2" />
+            <m:ToolbarSpacer />
+            <m:Button icon="sap-icon://refresh" tooltip="{i18n>refresh}" press="onRefresh" />
+          </m:OverflowToolbar>
+        </m:headerToolbar>
+        <m:columns>
+          <m:Column width="8rem"><m:Text text="{i18n>code}" /></m:Column>
+          <m:Column><m:Text text="{i18n>title}" /></m:Column>
+          <m:Column width="8rem"><m:Text text="{i18n>credits}" /></m:Column>
+          <m:Column width="8rem"><m:Text text="{i18n>capacity}" /></m:Column>
+          <m:Column><m:Text text="{i18n>teacher}" /></m:Column>
+        </m:columns>
+        <m:items>
+          <m:ColumnListItem>
+            <m:cells>
+              <m:Text text="{code}" />
+              <m:Text text="{title}" />
+              <m:Text text="{credits}" />
+              <m:Text text="{capacity}" />
+              <m:Text text="{teacher}" />
+            </m:cells>
+          </m:ColumnListItem>
+        </m:items>
+      </m:Table>
+    </m:content>
+  </m:Page>
+
+</mvc:View>

@@ -1,0 +1,244 @@
+<mvc:View
+  controllerName="studenthub.nov.controller.Students"
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns:m="sap.m"
+  xmlns:core="sap.ui.core"
+  displayBlock="true">
+
+  <m:Page id="studentsPage" title="{i18n>studentsTitle}" class="studentHubShell">
+
+    <m:headerContent>
+      <m:Toolbar>
+        <m:SearchField
+          id="searchField"
+          width="14rem"
+          placeholder="{i18n>searchPlaceholder}"
+          liveChange="onSearch"
+          search="onSearch" />
+        <m:Select id="departmentFilter" width="10rem" change="onDepartmentChange">
+          <m:items>
+            <core:Item key="" text="{i18n>allDepartments}" />
+            <core:Item key="CSE" text="CSE" />
+            <core:Item key="ECE" text="ECE" />
+            <core:Item key="MBA" text="MBA" />
+          </m:items>
+        </m:Select>
+        <m:Button text="{i18n>countButton}" icon="sap-icon://number-sign" press="onStudentCount" />
+        <m:Button text="{i18n>byDepartmentButton}" icon="sap-icon://group-2" press="onOpenDepartmentDialog" />
+        <m:ToolbarSpacer />
+        <m:Button text="{i18n>coursesButton}" icon="sap-icon://course-book" press="onNavToCourses" />
+        <m:Button text="{i18n>bpButton}" icon="sap-icon://person-placeholder" press="onNavToBusinessPartners" />
+        <m:Button text="{i18n>createButton}" icon="sap-icon://add" type="Emphasized" press="onOpenCreateDialog" />
+        <m:Button icon="sap-icon://refresh" tooltip="{i18n>refresh}" press="onRefresh" />
+      </m:Toolbar>
+    </m:headerContent>
+
+    <m:content>
+      <m:Table
+        id="studentsTable"
+        width="100%"
+        growing="true"
+        growingScrollToLoad="true"
+        items="{path: '/Students'}"
+        noDataText="{i18n>noStudents}">
+        <m:headerToolbar>
+          <m:OverflowToolbar>
+            <m:Title id="tableTitle" text="{i18n>studentListTitle}" level="H2" />
+            <m:ToolbarSpacer />
+            <m:Text id="countText" text="" />
+          </m:OverflowToolbar>
+        </m:headerToolbar>
+        <m:columns>
+          <m:Column width="16rem"><m:Text text="{i18n>name}" /></m:Column>
+          <m:Column><m:Text text="{i18n>email}" /></m:Column>
+          <m:Column width="8rem"><m:Text text="{i18n>department}" /></m:Column>
+          <m:Column width="9rem"><m:Text text="{i18n>status}" /></m:Column>
+          <m:Column width="11rem"><m:Text text="{i18n>bpNumber}" /></m:Column>
+          <m:Column width="22rem"><m:Text text="{i18n>actions}" /></m:Column>
+        </m:columns>
+        <m:items>
+          <m:ColumnListItem vAlign="Middle">
+            <m:cells>
+              <m:ObjectIdentifier title="{Name}" text="{ID}" />
+              <m:Text text="{Email}" />
+              <m:Text text="{department}" />
+              <m:ObjectStatus text="{status}" state="{path: 'status', formatter: '.formatStatusState'}" />
+              <m:Text text="{bpNumber}" />
+              <m:Toolbar class="detailIconButton">
+                <m:Button icon="sap-icon://course-book" tooltip="View enrolled courses" press="onViewCourses" />
+                <m:Button icon="sap-icon://add" tooltip="Enroll in a course" press="onOpenEnrollDialog" />
+                <m:Button icon="sap-icon://education" tooltip="Graduate" press="onGraduate" />
+                <m:Button
+                  icon="{path: 'status', formatter: '.formatSuspendIcon'}"
+                  tooltip="{path: 'status', formatter: '.formatSuspendTooltip'}"
+                  press="onToggleSuspend" />
+                <m:Button icon="sap-icon://average" tooltip="Average credits" press="onAverageCredits" />
+                <m:Button icon="sap-icon://building" tooltip="Change department" press="onOpenChangeDepartmentDialog" />
+                <m:Button icon="sap-icon://edit" tooltip="Edit student" press="onEditStudent" />
+                <m:Button icon="sap-icon://delete" tooltip="Delete" type="Reject" press="onDelete" />
+              </m:Toolbar>
+            </m:cells>
+          </m:ColumnListItem>
+        </m:items>
+      </m:Table>
+    </m:content>
+
+    <m:footer>
+      <m:OverflowToolbar>
+        <m:Text text="{i18n>footerHint}" />
+      </m:OverflowToolbar>
+    </m:footer>
+  </m:Page>
+
+  <!-- Create student dialog -->
+  <m:Dialog id="createDialog" title="{i18n>createStudent}" type="Message" contentWidth="420px">
+    <m:content>
+      <m:VBox class="sapUiSmallMargin">
+        <m:HBox alignItems="Center" class="sapUiTinyMarginBottom">
+          <m:Label text="{i18n>id}" width="7rem" />
+          <m:Input id="newId" width="19rem" placeholder="e.g. bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb" />
+        </m:HBox>
+        <m:HBox alignItems="Center" class="sapUiTinyMarginBottom">
+          <m:Label text="{i18n>name}" width="7rem" />
+          <m:Input id="newName" width="19rem" />
+        </m:HBox>
+        <m:HBox alignItems="Center" class="sapUiTinyMarginBottom">
+          <m:Label text="{i18n>email}" width="7rem" />
+          <m:Input id="newEmail" width="19rem" type="Email" />
+        </m:HBox>
+        <m:HBox alignItems="Center" class="sapUiTinyMarginBottom">
+          <m:Label text="{i18n>department}" width="7rem" />
+          <m:Select id="newDepartment" width="19rem">
+            <m:items>
+              <core:Item key="CSE" text="CSE" />
+              <core:Item key="ECE" text="ECE" />
+              <core:Item key="MBA" text="MBA" />
+            </m:items>
+          </m:Select>
+        </m:HBox>
+        <m:HBox alignItems="Center" class="sapUiTinyMarginBottom">
+          <m:Label text="{i18n>status}" width="7rem" />
+          <m:Select id="newStatus" width="19rem">
+            <m:items>
+              <core:Item key="Active" text="Active" />
+              <core:Item key="Inactive" text="Inactive" />
+            </m:items>
+          </m:Select>
+        </m:HBox>
+        <m:HBox alignItems="Center">
+          <m:Label text="{i18n>bpNumber}" width="7rem" />
+          <m:Input id="newBpNumber" width="19rem" />
+        </m:HBox>
+      </m:VBox>
+    </m:content>
+    <m:beginButton>
+      <m:Button text="{i18n>create}" type="Emphasized" press="onSaveNewStudent" />
+    </m:beginButton>
+    <m:endButton>
+      <m:Button text="{i18n>cancel}" press="onCloseCreateDialog" />
+    </m:endButton>
+  </m:Dialog>
+
+  <!-- Enroll dialog -->
+  <m:Dialog id="enrollDialog" title="{i18n>enrollInCourse}" type="Message" contentWidth="440px">
+    <m:content>
+      <m:VBox class="sapUiSmallMargin">
+        <m:Text id="enrollStudentName" class="sapUiTinyMarginBottom" />
+        <m:Select id="courseSelect" width="24rem" items="{path: '/Courses'}">
+          <m:items>
+            <core:Item key="{code}" text="{code} - {title} ({credits} credits)" />
+          </m:items>
+        </m:Select>
+      </m:VBox>
+    </m:content>
+    <m:beginButton>
+      <m:Button text="{i18n>enrollInCourse}" type="Emphasized" press="onEnroll" />
+    </m:beginButton>
+    <m:endButton>
+      <m:Button text="{i18n>cancel}" press="onCloseEnrollDialog" />
+    </m:endButton>
+  </m:Dialog>
+
+  <!-- Enrolled courses dialog -->
+  <m:Dialog id="enrolledCoursesDialog" title="{i18n>enrolledCourses}" type="Standard" contentWidth="640px">
+    <m:content>
+      <m:Table id="enrolledCoursesTable" width="100%" items="{local>/courses}" noDataText="No enrollments">
+        <m:columns>
+          <m:Column><m:Text text="{i18n>code}" /></m:Column>
+          <m:Column><m:Text text="{i18n>title}" /></m:Column>
+          <m:Column><m:Text text="{i18n>credits}" /></m:Column>
+          <m:Column><m:Text text="{i18n>teacher}" /></m:Column>
+          <m:Column width="6rem"><m:Text text="{i18n>actions}" /></m:Column>
+        </m:columns>
+        <m:items>
+          <m:ColumnListItem>
+            <m:cells>
+              <m:Text text="{local>code}" />
+              <m:Text text="{local>title}" />
+              <m:Text text="{local>credits}" />
+              <m:Text text="{local>teacher}" />
+              <m:Button icon="sap-icon://delete" tooltip="Drop course" type="Reject" press="onDropCourse" />
+            </m:cells>
+          </m:ColumnListItem>
+        </m:items>
+      </m:Table>
+    </m:content>
+    <m:endButton>
+      <m:Button text="{i18n>close}" press="onCloseCoursesDialog" />
+    </m:endButton>
+  </m:Dialog>
+
+  <!-- Change department dialog (bound action) -->
+  <m:Dialog id="changeDepartmentDialog" title="Change Department" type="Message" contentWidth="440px">
+    <m:content>
+      <m:VBox class="sapUiSmallMargin">
+        <m:HBox alignItems="Center" class="sapUiTinyMarginBottom">
+          <m:Label text="{i18n>name}" width="7rem" />
+          <m:Text id="changeDeptStudentName" />
+        </m:HBox>
+        <m:HBox alignItems="Center">
+          <m:Label text="{i18n>department}" width="7rem" />
+          <m:Select id="changeDepartmentSelect" width="16rem">
+            <m:items>
+              <core:Item key="CSE" text="CSE" />
+              <core:Item key="ECE" text="ECE" />
+              <core:Item key="MBA" text="MBA" />
+            </m:items>
+          </m:Select>
+        </m:HBox>
+      </m:VBox>
+    </m:content>
+    <m:beginButton>
+      <m:Button text="{i18n>save}" type="Emphasized" press="onChangeDepartment" />
+    </m:beginButton>
+    <m:endButton>
+      <m:Button text="{i18n>cancel}" press="onCloseChangeDepartmentDialog" />
+    </m:endButton>
+  </m:Dialog>
+
+  <!-- Students by department dialog (unbound function) -->
+  <m:Dialog id="departmentDialog" title="{i18n>byDepartmentButton}" type="Standard" contentWidth="560px">
+    <m:content>
+      <m:VBox class="sapUiSmallMargin">
+        <m:HBox alignItems="Center" class="sapUiTinyMarginBottom">
+          <m:Label text="{i18n>department}" width="7rem" />
+          <m:Select id="departmentSearchSelect" width="16rem">
+            <m:items>
+              <core:Item key="CSE" text="CSE" />
+              <core:Item key="ECE" text="ECE" />
+              <core:Item key="MBA" text="MBA" />
+            </m:items>
+          </m:Select>
+          <m:Button text="{i18n>search}" type="Emphasized" class="sapUiSmallMarginBegin" press="onSearchByDepartment" />
+        </m:HBox>
+        <m:List id="departmentResults" items="{local>/departmentStudents}" noDataText="{i18n>noStudents}">
+          <m:StandardListItem title="{local>Name}" description="{local>Email}" info="{local>status}" />
+        </m:List>
+      </m:VBox>
+    </m:content>
+    <m:endButton>
+      <m:Button text="{i18n>close}" press="onCloseDepartmentDialog" />
+    </m:endButton>
+  </m:Dialog>
+
+</mvc:View>

@@ -1,0 +1,130 @@
+{
+  "_version": "1.58.0",
+  "sap.app": {
+    "id": "studenthub.nov",
+    "type": "application",
+    "i18n": "i18n/i18n.properties",
+    "applicationVersion": {
+      "version": "1.0.0"
+    },
+    "title": "{{appTitle}}",
+    "description": "{{appDescription}}",
+    "dataSources": {
+      "studentService": {
+        "uri": "/odata/v4/student/",
+        "type": "ODataV4"
+      },
+      "davidService": {
+        "uri": "/odata/v4/david-s4/",
+        "type": "ODataV4"
+      }
+    }
+  },
+  "sap.ui": {
+    "technology": "UI5",
+    "deviceTypes": {
+      "desktop": true,
+      "tablet": true,
+      "phone": true
+    }
+  },
+  "sap.ui5": {
+    "flexEnabled": false,
+    "rootView": {
+      "viewName": "studenthub.nov.view.App",
+      "type": "XML",
+      "async": true,
+      "id": "App"
+    },
+    "dependencies": {
+      "minUI5Version": "1.120.0",
+      "libs": {
+        "sap.ui.core": {},
+        "sap.m": {}
+      }
+    },
+    "contentDensities": {
+      "compact": true,
+      "cozy": true
+    },
+    "models": {
+      "i18n": {
+        "type": "sap.ui.model.resource.ResourceModel",
+        "settings": {
+          "bundleName": "studenthub.nov.i18n.i18n"
+        }
+      },
+      "local": {
+        "type": "sap.ui.model.json.JSONModel",
+        "settings": {}
+      },
+      "bp": {
+        "type": "sap.ui.model.json.JSONModel",
+        "settings": {}
+      },
+      "s4": {
+        "type": "sap.ui.model.odata.v4.ODataModel",
+        "dataSource": "davidService",
+        "settings": {
+          "odataVersion": "4.0",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      },
+      "": {
+        "type": "sap.ui.model.odata.v4.ODataModel",
+        "dataSource": "studentService",
+        "settings": {
+          "odataVersion": "4.0",
+          "autoExpandSelect": true,
+          "earlyRequests": true
+        }
+      }
+    },
+    "routing": {
+      "config": {
+        "routerClass": "sap.m.routing.Router",
+        "viewType": "XML",
+        "viewPath": "studenthub.nov.view",
+        "controlId": "app",
+        "controlAggregation": "pages",
+        "transition": "slide",
+        "async": true
+      },
+      "routes": [
+        {
+          "pattern": "",
+          "name": "students",
+          "target": "students"
+        },
+        {
+          "pattern": "courses",
+          "name": "courses",
+          "target": "courses"
+        },
+        {
+          "pattern": "business-partners",
+          "name": "businessPartners",
+          "target": "businessPartners"
+        }
+      ],
+      "targets": {
+        "students": {
+          "viewName": "Students",
+          "viewId": "students",
+          "viewLevel": 1
+        },
+        "courses": {
+          "viewName": "Courses",
+          "viewId": "courses",
+          "viewLevel": 2
+        },
+        "businessPartners": {
+          "viewName": "BusinessPartners",
+          "viewId": "businessPartners",
+          "viewLevel": 2
+        }
+      }
+    }
+  }
+}

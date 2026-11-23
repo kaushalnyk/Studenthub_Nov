@@ -1,0 +1,7 @@
+<mvc:View
+  controllerName="studenthub.nov.controller.App"
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns:m="sap.m"
+  displayBlock="true">
+  <m:App id="app" />
+</mvc:View>

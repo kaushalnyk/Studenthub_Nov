@@ -10,6 +10,8 @@ build-parameters:
       commands:
         - npm ci
         - npx cds build --production
+        - mkdir -p .deploy/app-router/resources/studenthub
+        - cp -R app/studenthub/. .deploy/app-router/resources/studenthub/
 modules:
   - name: Studenthub_Nov-srv
     type: nodejs
@@ -73,6 +75,19 @@ resources:
             - "x509"
           redirect-uris:
             - https://*~{app-api/app-uri}/**
+        role-collections:
+          - name: 'User (Studenthub_Nov ${org}-${space})'
+            description: 'generated'
+            role-template-references:
+              - '$XSAPPNAME.User'
+          - name: 'Manager (Studenthub_Nov ${org}-${space})'
+            description: 'generated'
+            role-template-references:
+              - '$XSAPPNAME.Manager'
+          - name: 'Admin (Studenthub_Nov ${org}-${space})'
+            description: 'generated'
+            role-template-references:
+              - '$XSAPPNAME.Admin'
     requires:
       - name: app-api
   - name: Studenthub_Nov-db
