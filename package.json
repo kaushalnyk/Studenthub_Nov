@@ -4,11 +4,12 @@
   "type": "module",
   "dependencies": {
     "@cap-js/hana": "^3",
-    "@sap/cds": "^10",
-    "@sap/xssec": "^4",
+    "@cap-js/openapi": "^1.7.1",
     "@sap-cloud-sdk/connectivity": "^4",
     "@sap-cloud-sdk/http-client": "^4",
-    "@sap-cloud-sdk/resilience": "^4"
+    "@sap-cloud-sdk/resilience": "^4",
+    "@sap/cds": "^10",
+    "@sap/xssec": "^4"
   },
   "devDependencies": {
     "@cap-js/sqlite": "^3",
@@ -50,6 +51,9 @@
             }
           }
         }
+      },
+      "Weather": {
+        "model": "srv/external/Weather"
       },
       "API_BUSINESS_PARTNER": {
         "kind": "odata-v2",

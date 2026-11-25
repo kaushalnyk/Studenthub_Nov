@@ -6,4 +6,5 @@
   <Button text="{i18n>navCourses}" tooltip="{i18n>navCourses}" icon="sap-icon://course-book" type="Transparent" class="hubNavBtn" app:route="courses" press=".onNav" />
   <Button text="{i18n>navEnrollments}" tooltip="{i18n>navEnrollments}" icon="sap-icon://study-leave" type="Transparent" class="hubNavBtn" app:route="enrollments" press=".onNav" />
   <Button text="{i18n>navPartners}" tooltip="{i18n>navPartners}" icon="sap-icon://customer" type="Transparent" class="hubNavBtn" app:route="businessPartners" press=".onNav" />
+  <Button text="{i18n>navWeather}" tooltip="{i18n>navWeather}" icon="sap-icon://weather" type="Transparent" class="hubNavBtn" app:route="weather" press=".onNav" />
 </core:FragmentDefinition>

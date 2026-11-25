@@ -17,6 +17,10 @@
       "davidService": {
         "uri": "/odata/v4/david-s4/",
         "type": "ODataV4"
+      },
+      "weatherService": {
+        "uri": "/odata/v4/weather/",
+        "type": "ODataV4"
       }
     }
   },
@@ -82,6 +86,14 @@
           "earlyRequests": true,
           "operationMode": "Server"
         }
+      },
+      "weather": {
+        "type": "sap.ui.model.odata.v4.ODataModel",
+        "dataSource": "weatherService",
+        "settings": {
+          "odataVersion": "4.0",
+          "operationMode": "Server"
+        }
       }
     },
     "routing": {
@@ -119,6 +131,11 @@
           "pattern": "business-partners",
           "name": "businessPartners",
           "target": "businessPartners"
+        },
+        {
+          "pattern": "weather",
+          "name": "weather",
+          "target": "weather"
         }
       ],
       "targets": {
@@ -145,6 +162,11 @@
         "enrollments": {
           "viewName": "Enrollments",
           "viewId": "enrollments",
+          "viewLevel": 1
+        },
+        "weather": {
+          "viewName": "Weather",
+          "viewId": "weather",
           "viewLevel": 1
         }
       }

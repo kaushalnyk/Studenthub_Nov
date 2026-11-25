@@ -455,3 +455,181 @@ body.sapUiBody {
     padding: 0.5rem 0.75rem;
   }
 }
+
+/* ---------- Weather card ---------- */
+.hubCard.weatherCard {
+  display: block !important;
+  padding: 1.75rem 2rem;
+  border: 0;
+  border-radius: 20px;
+  color: #fff;
+  background: linear-gradient(135deg, #1e40af 0%, #2f6fed 55%, #5b9bff 100%);
+  box-shadow: 0 18px 40px rgba(23, 59, 138, 0.28);
+  position: relative;
+  overflow: hidden;
+}
+
+.hubCard.weatherCard::after {
+  content: "";
+  position: absolute;
+  right: -80px;
+  bottom: -140px;
+  width: 340px;
+  height: 340px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+}
+
+.hubCard.weatherCard.wClear {
+  background: linear-gradient(135deg, #b45309 0%, #f59e0b 55%, #fbbf24 100%);
+  box-shadow: 0 18px 40px rgba(180, 83, 9, 0.28);
+}
+
+.hubCard.weatherCard.wClouds {
+  background: linear-gradient(135deg, #1e293b 0%, #475569 60%, #7c8da3 100%);
+  box-shadow: 0 18px 40px rgba(30, 41, 59, 0.28);
+}
+
+.hubCard.weatherCard.wRain {
+  background: linear-gradient(135deg, #0c2340 0%, #1d4ed8 60%, #38bdf8 100%);
+  box-shadow: 0 18px 40px rgba(12, 35, 64, 0.3);
+}
+
+.hubCard.weatherCard.wSnow {
+  background: linear-gradient(135deg, #31577d 0%, #6f9fc7 60%, #c7e3f7 100%);
+  box-shadow: 0 18px 40px rgba(49, 87, 125, 0.28);
+}
+
+.hubCard.weatherCard.wStorm {
+  background: linear-gradient(135deg, #312e81 0%, #4338ca 55%, #7c3aed 100%);
+  box-shadow: 0 18px 40px rgba(49, 46, 129, 0.3);
+}
+
+.hubCard.weatherCard.wMist {
+  background: linear-gradient(135deg, #334155 0%, #4b6b8a 60%, #7b9bb8 100%);
+  box-shadow: 0 18px 40px rgba(51, 65, 85, 0.28);
+}
+
+.weatherContent {
+  position: relative;
+  z-index: 1;
+}
+
+.weatherMain {
+  gap: 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+.hubCard.weatherCard .weatherIcon {
+  flex: 0 0 auto;
+  width: 7.5rem !important;
+  height: 7.5rem !important;
+  box-sizing: border-box;
+  padding: 0.55rem;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  filter: drop-shadow(0 10px 18px rgba(8, 20, 45, 0.35));
+}
+
+.weatherMainText {
+  gap: 0.1rem;
+  justify-content: center;
+}
+
+.hubCard.weatherCard .weatherCity {
+  color: rgba(255, 255, 255, 0.85) !important;
+  font-size: 0.8rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.weatherTempRow {
+  align-items: flex-end;
+  gap: 0.25rem;
+}
+
+.hubCard.weatherCard .weatherTemp {
+  color: #fff !important;
+  font-size: 4.5rem !important;
+  font-weight: 700 !important;
+  line-height: 0.95 !important;
+  letter-spacing: -0.03em;
+}
+
+.hubCard.weatherCard .weatherUnit {
+  color: rgba(255, 255, 255, 0.85) !important;
+  font-size: 1.75rem !important;
+  font-weight: 600 !important;
+  padding-bottom: 0.45rem;
+}
+
+.hubCard.weatherCard .weatherDesc {
+  color: #fff !important;
+  font-size: 1.15rem !important;
+  font-weight: 600 !important;
+  text-transform: capitalize;
+  margin-top: 0.2rem;
+}
+
+.hubCard.weatherCard .weatherFeels {
+  color: rgba(255, 255, 255, 0.8) !important;
+  font-size: 0.85rem !important;
+  margin-top: 0.1rem;
+}
+
+.weatherMetrics {
+  gap: 0.9rem;
+  margin-top: 1.5rem;
+}
+
+.hubCard.weatherCard .weatherMetric {
+  flex: 1 1 8rem;
+  min-width: 8rem;
+  padding: 0.85rem 1.1rem;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(4px);
+}
+
+.hubCard.weatherCard .weatherMetricLabel {
+  color: rgba(255, 255, 255, 0.75) !important;
+  font-size: 0.7rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.hubCard.weatherCard .weatherMetricValue {
+  color: #fff !important;
+  font-size: 1.35rem !important;
+  font-weight: 700 !important;
+  margin-top: 0.35rem;
+}
+
+@media (max-width: 720px) {
+  .hubCard.weatherCard {
+    padding: 1.25rem 1.25rem 1.1rem;
+  }
+
+  .weatherMain {
+    gap: 1rem;
+  }
+
+  .hubCard.weatherCard .weatherIcon {
+    width: 5.5rem !important;
+    height: 5.5rem !important;
+  }
+
+  .hubCard.weatherCard .weatherTemp {
+    font-size: 3.25rem !important;
+  }
+
+  .hubCard.weatherCard .weatherMetric {
+    flex: 1 1 100%;
+  }
+}

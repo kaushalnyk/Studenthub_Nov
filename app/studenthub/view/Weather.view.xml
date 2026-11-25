@@ -1,0 +1,43 @@
+<mvc:View
+  controllerName="studenthub.nov.controller.Weather"
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns:m="sap.m"
+  xmlns:core="sap.ui.core"
+  displayBlock="true">
+
+  <m:Page id="weatherPage" title="{i18n>weatherTitle}" class="studentHubShell">
+
+    <m:headerContent>
+      <core:Fragment fragmentName="studenthub.nov.view.Nav" type="XML" />
+    </m:headerContent>
+
+    <m:content>
+      <m:VBox class="hubHero">
+        <m:Title text="{i18n>weatherHeroTitle}" level="H1" titleStyle="H2" wrapping="true" />
+        <m:Text text="{i18n>weatherHeroText}" class="hubHeroText" />
+      </m:VBox>
+
+      <m:OverflowToolbar class="hubFilterBar">
+        <m:SearchField
+          id="wCity"
+          width="16rem"
+          placeholder="{i18n>weatherCityPlaceholder}"
+          search="onGetWeather" />
+        <m:ToolbarSpacer />
+        <m:Button text="{i18n>weatherGet}" icon="sap-icon://weather" type="Emphasized" press="onGetWeather" />
+        <m:Button type="Transparent" icon="sap-icon://refresh" tooltip="{i18n>refresh}" press="onGetWeather" />
+      </m:OverflowToolbar>
+
+      <m:VBox id="wResult" class="hubCard weatherCard" visible="false" />
+
+      <m:IllustratedMessage id="wEmpty" illustrationType="sapIllus-NoSearchResults" illustrationSize="Spot" title="{i18n>weatherEmptyTitle}" description="{i18n>weatherEmptyHint}" enableVerticalResponsiveness="true" />
+    </m:content>
+
+    <m:footer>
+      <m:OverflowToolbar>
+        <m:Text text="{i18n>weatherFooter}" />
+      </m:OverflowToolbar>
+    </m:footer>
+  </m:Page>
+
+</mvc:View>
