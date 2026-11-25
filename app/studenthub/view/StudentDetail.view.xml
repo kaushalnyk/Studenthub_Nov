@@ -1,0 +1,96 @@
+<mvc:View
+  controllerName="studenthub.nov.controller.StudentDetail"
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns:m="sap.m"
+  xmlns:core="sap.ui.core"
+  displayBlock="true">
+
+  <m:Page id="studentDetailPage" title="{i18n>studentProfile}" showNavButton="true" navButtonPress="onNavBack" class="studentHubShell">
+
+    <m:headerContent>
+      <core:Fragment fragmentName="studenthub.nov.view.Nav" type="XML" />
+    </m:headerContent>
+
+    <m:content>
+      <!-- Profile card -->
+      <m:FlexBox class="hubCard hubProfile" alignItems="Center" wrap="Wrap">
+        <m:Avatar initials="{path: 'Name', formatter: '.formatInitials'}" backgroundColor="{path: 'department', formatter: '.formatDeptColor'}" displaySize="L" displayShape="Circle" class="hubProfileAvatar" />
+        <m:VBox class="hubProfileMain">
+          <m:Title text="{Name}" level="H1" titleStyle="H3" wrapping="true" />
+          <m:Link text="{Email}" href="{= 'mailto:' + ${path: 'Email', targetType: 'any'} }" class="hubProfileEmail" />
+          <m:HBox class="hubProfileTags" wrap="Wrap" alignItems="Center">
+            <m:ObjectStatus text="{status}" inverted="true" icon="{path: 'status', formatter: '.formatStatusIcon'}" state="{path: 'status', formatter: '.formatStatusState'}" />
+            <m:ObjectStatus text="{department}" inverted="true" state="Information" icon="sap-icon://building" />
+            <m:ObjectStatus text="{= ${path: 'bpNumber', targetType: 'any'} ? 'BP ' + ${path: 'bpNumber', targetType: 'any'} : '' }" state="None" icon="sap-icon://customer" visible="{= !!${path: 'bpNumber', targetType: 'any'} }" />
+          </m:HBox>
+        </m:VBox>
+        <m:HBox class="hubProfileActions" wrap="Wrap" justifyContent="End">
+          <m:Button
+            text="{= ${path: 'status', targetType: 'any'} === 'Suspended' ? ${i18n>activateStudent} : ${i18n>suspendStudent} }"
+            icon="{= ${path: 'status', targetType: 'any'} === 'Suspended' ? 'sap-icon://media-play' : 'sap-icon://media-pause' }"
+            enabled="{= ${path: 'status', targetType: 'any'} !== 'Graduated' }"
+            press="onToggleSuspend" />
+          <m:Button text="{i18n>graduate}" icon="sap-icon://education" enabled="{= ${path: 'status', targetType: 'any'} !== 'Graduated' }" press="onGraduate" />
+          <m:Button text="{i18n>delete}" icon="sap-icon://delete" type="Reject" press="onDelete" />
+        </m:HBox>
+      </m:FlexBox>
+
+      <!-- Numbers -->
+      <m:FlexBox class="hubKpis" wrap="Wrap">
+        <m:GenericTile class="hubKpi" header="{i18n>enrolledCourses}" frameType="OneByHalf">
+          <m:TileContent>
+            <m:NumericContent value="{detail>/courseCount}" icon="sap-icon://course-book" withMargin="false" />
+          </m:TileContent>
+        </m:GenericTile>
+        <m:GenericTile class="hubKpi" header="{i18n>totalCredits}" frameType="OneByHalf">
+          <m:TileContent>
+            <m:NumericContent value="{detail>/totalCredits}" icon="sap-icon://sum" withMargin="false" />
+          </m:TileContent>
+        </m:GenericTile>
+        <m:GenericTile class="hubKpi" header="{i18n>averageCredits}" frameType="OneByHalf">
+          <m:TileContent>
+            <m:NumericContent value="{detail>/averageCredits}" icon="sap-icon://average" valueColor="Good" withMargin="false" />
+          </m:TileContent>
+        </m:GenericTile>
+      </m:FlexBox>
+
+      <!-- Enrolled courses -->
+      <m:VBox class="hubCard">
+        <m:Table id="detailCoursesTable" width="auto" items="{detail>/courses}">
+          <m:noData>
+            <m:IllustratedMessage illustrationType="sapIllus-EmptyList" illustrationSize="Spot" title="{i18n>noEnrollments}" description="{i18n>noEnrollmentsHint}" enableVerticalResponsiveness="true" />
+          </m:noData>
+          <m:headerToolbar>
+            <m:OverflowToolbar>
+              <m:Title text="{i18n>enrolledCourses}" level="H2" />
+              <m:ToolbarSpacer />
+              <m:ComboBox id="detailCourseSelect" width="18rem" placeholder="{i18n>pickCourse}" items="{detail>/availableCourses}" enabled="{= ${detail>/availableCourses}.length > 0 }">
+                <core:ListItem key="{detail>code}" text="{detail>code} · {detail>title}" />
+              </m:ComboBox>
+              <m:Button text="{i18n>enroll}" icon="sap-icon://add" type="Emphasized" press="onEnroll" />
+            </m:OverflowToolbar>
+          </m:headerToolbar>
+          <m:columns>
+            <m:Column width="7rem"><m:Text text="{i18n>code}" /></m:Column>
+            <m:Column><m:Text text="{i18n>title}" /></m:Column>
+            <m:Column width="6rem" hAlign="End"><m:Text text="{i18n>credits}" /></m:Column>
+            <m:Column minScreenWidth="Tablet" demandPopin="true"><m:Text text="{i18n>teacher}" /></m:Column>
+            <m:Column width="5rem" hAlign="End"><m:Text text="" /></m:Column>
+          </m:columns>
+          <m:items>
+            <m:ColumnListItem vAlign="Middle">
+              <m:cells>
+                <m:ObjectStatus text="{detail>code}" state="Information" inverted="true" />
+                <m:ObjectIdentifier title="{detail>title}" />
+                <m:ObjectNumber number="{detail>credits}" unit="cr" />
+                <m:Text text="{detail>teacher}" />
+                <m:Button icon="sap-icon://decline" tooltip="{i18n>dropCourse}" type="Transparent" class="hubDanger" press="onDropCourse" />
+              </m:cells>
+            </m:ColumnListItem>
+          </m:items>
+        </m:Table>
+      </m:VBox>
+    </m:content>
+  </m:Page>
+
+</mvc:View>

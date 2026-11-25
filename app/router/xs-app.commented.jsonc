@@ -1,0 +1,70 @@
+// Reference copy of xs-app.json with // comments explaining each line.
+// This file is for documentation only. The app router reads xs-app.json, NOT this file.
+
+{
+  // Default page served when a request does not match a specific route.
+  "welcomeFile": "/studenthub/index.html",
+
+  // "route" means each route defines its own authenticationType.
+  "authenticationMethod": "route",
+
+  // Logout configuration block.
+  "logout": {
+    // Endpoint called to end the user's session and clear the SSO cookie.
+    "logoutEndpoint": "/do/logout"
+  },
+
+  // Ordered routing rules. The first rule whose source regex matches wins.
+  "routes": [
+    {
+      // 1. Serves the UI app's static resources from the local folder.
+      // Regex matched against the incoming URL; (.*) captures the path after /studenthub/.
+      "source": "^/studenthub/(.*)$",
+      // Rewrite to the captured path only (drops the /studenthub prefix).
+      "target": "$1",
+      // Serve from this local folder instead of forwarding to a destination.
+      "localDir": "resources",
+      // Requires xsuaa (OAuth2) login.
+      "authenticationType": "xsuaa"
+    },
+    {
+      // 2. Forwards OData V4 service requests to the backend.
+      // Matches /odata/v4/... and captures the rest of the path.
+      "source": "^/odata/v4/(.*)$",
+      // Rebuilds the path as /odata/v4/<captured> for the destination.
+      "target": "/odata/v4/$1",
+      // Backend destination name (from default-env.json / VCAP_SERVICES).
+      "destination": "srv-api",
+      // false disables the CSRF token check for this route.
+      "csrfProtection": false,
+      // Requires xsuaa (OAuth2) login.
+      "authenticationType": "xsuaa"
+    },
+    {
+      // 3. Forwards custom REST API calls to the backend.
+      // Matches /api/... and captures the rest of the path.
+      "source": "^/api/(.*)$",
+      // Strips the /api prefix before forwarding.
+      "target": "/$1",
+      // Backend destination name.
+      "destination": "srv-api",
+      // false disables the CSRF token check for this route.
+      "csrfProtection": false,
+      // Requires xsuaa (OAuth2) login.
+      "authenticationType": "xsuaa"
+    },
+    {
+      // 4. Catch-all: handles any request that did not match earlier routes.
+      // ^/(.*)$ matches every remaining path.
+      "source": "^/(.*)$",
+      // Keeps the original path unchanged when forwarding.
+      "target": "/$1",
+      // Backend destination name.
+      "destination": "srv-api",
+      // false disables the CSRF token check for this route.
+      "csrfProtection": false,
+      // Requires xsuaa (OAuth2) login.
+      "authenticationType": "xsuaa"
+    }
+  ]
+}

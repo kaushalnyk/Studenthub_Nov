@@ -1,5 +1,5 @@
 sap.ui.define([
-  "sap/ui/core/mvc/Controller",
+  "studenthub/nov/controller/BaseController",
   "sap/ui/model/Filter",
   "sap/ui/model/FilterOperator",
   "sap/m/MessageToast",
@@ -7,42 +7,67 @@ sap.ui.define([
 ], function (Controller, Filter, FilterOperator, MessageToast, MessageBox) {
   "use strict";
 
-  var SERVICE_PATH = "/odata/v4/student/";
+  var EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   return Controller.extend("studenthub.nov.controller.Students", {
 
     onInit: function () {
       this._localModel = this.getOwnerComponent().getModel("local");
-      this._localModel.setData({ courses: [] });
+      this._localModel.setData({
+        courses: [],
+        departmentStudents: [],
+        stats: { total: 0, Active: 0, Inactive: 0, Suspended: 0, Graduated: 0 }
+      });
+      this._statusFilter = "";
+      this.markNav("studentsPage", "students");
+      this.getRouter().getRoute("students").attachPatternMatched(this._loadStats, this);
+    },
 
-      // OData V4 list bindings must use server-side filtering. Some UI5 SDK
-      // builds do not default this on bindings created from XML views.
-      var oBinding = this.byId("studentsTable").getBinding("items");
-      if (oBinding && !oBinding.sOperationMode) {
-        oBinding.sOperationMode = "Server";
-      }
+    /* ---------- KPI tiles ---------- */
 
-      this._updateCount();
+    _loadStats: function () {
+      var that = this;
+      this.callStudentService("Students?$select=ID,status&$top=5000", "GET")
+        .then(function (aStudents) {
+          var oStats = { total: aStudents.length, Active: 0, Inactive: 0, Suspended: 0, Graduated: 0 };
+          aStudents.forEach(function (oStudent) {
+            if (Object.prototype.hasOwnProperty.call(oStats, oStudent.status)) {
+              oStats[oStudent.status]++;
+            }
+          });
+          that._localModel.setProperty("/stats", oStats);
+        })
+        .catch(function () { /* already reported */ });
+    },
+
+    onKpiPress: function (oEvent) {
+      var sStatus = oEvent.getSource().data("status");
+      this._statusFilter = this._statusFilter === sStatus ? "" : sStatus;
+      ["All", "Active", "Inactive", "Suspended", "Graduated"].forEach(function (sKey) {
+        var bSelected = (sKey === "All" ? "" : sKey) === this._statusFilter;
+        this.byId("kpi" + sKey).toggleStyleClass("hubKpiSelected", bSelected);
+      }, this);
+      this._applyFilters();
+    },
+
+    onRowPress: function (oEvent) {
+      var oStudent = oEvent.getSource().getBindingContext().getObject();
+      this.getRouter().navTo("studentDetail", { id: oStudent.ID });
+    },
+
+    onUpdateFinished: function (oEvent) {
+      var iTotal = oEvent.getParameter("total");
+      this.byId("countText").setText(this.t(iTotal === 1 ? "studentCountOne" : "studentCountMany", [iTotal]));
     },
 
     /* ---------- Formatters ---------- */
 
-    formatStatusState: function (sStatus) {
-      switch (sStatus) {
-        case "Active": return "Success";
-        case "Inactive": return "Warning";
-        case "Suspended": return "Error";
-        case "Graduated": return "Information";
-        default: return "None";
-      }
-    },
-
     formatSuspendIcon: function (sStatus) {
-      return sStatus === "Suspended" ? "sap-icon://activate" : "sap-icon://pause";
+      return sStatus === "Suspended" ? "sap-icon://media-play" : "sap-icon://media-pause";
     },
 
-    formatSuspendTooltip: function (sStatus) {
-      return sStatus === "Suspended" ? "Activate student" : "Suspend student";
+    formatSuspendText: function (sStatus) {
+      return this.t(sStatus === "Suspended" ? "activateStudent" : "suspendStudent");
     },
 
     /* ---------- Filtering ---------- */
@@ -55,6 +80,16 @@ sap.ui.define([
       this._applyFilters();
     },
 
+    onClearFilters: function () {
+      this.byId("searchField").setValue("");
+      this.byId("departmentFilter").setSelectedKey("");
+      this._statusFilter = "";
+      ["All", "Active", "Inactive", "Suspended", "Graduated"].forEach(function (sKey) {
+        this.byId("kpi" + sKey).removeStyleClass("hubKpiSelected");
+      }, this);
+      this._applyFilters();
+    },
+
     _applyFilters: function () {
       var oBinding = this.byId("studentsTable").getBinding("items");
       if (!oBinding) {
@@ -62,102 +97,35 @@ sap.ui.define([
       }
 
       var aFilters = [];
-      var sQuery = (this.byId("searchField").getValue() || "").trim().toLowerCase();
+      var sQuery = (this.byId("searchField").getValue() || "").trim();
       var sDepartment = this.byId("departmentFilter").getSelectedKey();
 
       if (sQuery) {
         aFilters.push(new Filter([
-          new Filter("Name", FilterOperator.Contains, sQuery),
-          new Filter("Email", FilterOperator.Contains, sQuery),
-          new Filter("bpNumber", FilterOperator.Contains, sQuery)
+          new Filter({ path: "Name", operator: FilterOperator.Contains, value1: sQuery, caseSensitive: false }),
+          new Filter({ path: "Email", operator: FilterOperator.Contains, value1: sQuery, caseSensitive: false }),
+          new Filter({ path: "bpNumber", operator: FilterOperator.Contains, value1: sQuery, caseSensitive: false })
         ], false));
       }
       if (sDepartment) {
         aFilters.push(new Filter("department", FilterOperator.EQ, sDepartment));
       }
-
-      if (!oBinding.sOperationMode) {
-        oBinding.sOperationMode = "Server";
+      if (this._statusFilter) {
+        aFilters.push(new Filter("status", FilterOperator.EQ, this._statusFilter));
       }
+
       oBinding.filter(aFilters);
-      this._updateCount();
-    },
-
-    _updateCount: function () {
-      var oTable = this.byId("studentsTable");
-      if (oTable && oTable.getBinding("items")) {
-        this.byId("countText").setText(oTable.getItems().length + " students");
-      }
-    },
-
-    /* ---------- Navigation and refresh ---------- */
-
-    onNavToCourses: function () {
-      this.getOwnerComponent().getRouter().navTo("courses");
-    },
-
-    onNavToBusinessPartners: function () {
-      this.getOwnerComponent().getRouter().navTo("businessPartners");
     },
 
     onRefresh: function () {
       this.getOwnerComponent().getModel().refresh();
+      this._loadStats();
     },
 
-    /* ---------- OData action helper ---------- */
-
-    _getCsrfToken: function () {
-      return fetch(SERVICE_PATH + "$metadata", {
-        headers: { "x-csrf-token": "Fetch" },
-        credentials: "same-origin"
-      }).then(function (oResponse) {
-        return oResponse.headers.get("x-csrf-token");
-      }).catch(function () {
-        return null;
-      });
-    },
-
-    _callOData: function (sPath, sMethod, oData) {
-      var that = this;
-      return this._getCsrfToken().then(function (sToken) {
-        var oHeaders = {
-          "Content-Type": "application/json",
-          "Accept": "application/json"
-        };
-        if (sToken) {
-          oHeaders["x-csrf-token"] = sToken;
-        }
-        return fetch(SERVICE_PATH + sPath, {
-          method: sMethod || "POST",
-          headers: oHeaders,
-          credentials: "same-origin",
-          body: sMethod === "GET" ? undefined : JSON.stringify(oData || {})
-        });
-      }).then(function (oResponse) {
-        if (!oResponse.ok) {
-          return oResponse.json().then(function (oError) {
-            throw new Error((oError.error && oError.error.message) || ("Request failed (" + oResponse.status + ")"));
-          }).catch(function (oError) {
-            throw oError instanceof Error ? oError : new Error("Request failed (" + oResponse.status + ")");
-          });
-        }
-        if (oResponse.status === 204) {
-          return null;
-        }
-        return oResponse.json().then(function (oResult) {
-          // OData V4 function responses wrap the actual result in "value".
-          return oResult && Object.prototype.hasOwnProperty.call(oResult, "value")
-            ? oResult.value
-            : oResult;
-        });
-      }).catch(function (oError) {
-        MessageToast.show(oError.message || "Service call failed");
-        throw oError;
-      });
-    },
+    /* ---------- Helpers ---------- */
 
     _studentPath: function (sId) {
-      return "Students(ID='" + encodeURIComponent(sId) + "')/StudentService.";
+      return "Students(" + encodeURIComponent(sId) + ")/StudentService.";
     },
 
     _getStudent: function (oEvent) {
@@ -171,16 +139,20 @@ sap.ui.define([
         return;
       }
       var that = this;
-      this._callOData(this._studentPath(oStudent.ID) + sAction, "POST", {})
+      this.callStudentService(this._studentPath(oStudent.ID) + sAction, "POST", {})
         .then(function () {
           MessageToast.show(sSuccessMessage);
           that.onRefresh();
-          that._updateCount();
         })
         .catch(function () { /* already reported */ });
     },
 
     /* ---------- Row actions ---------- */
+
+    onOpenMoreMenu: function (oEvent) {
+      var oButton = oEvent.getSource();
+      oButton.getDependents()[0].openBy(oButton);
+    },
 
     onViewCourses: function (oEvent) {
       var oStudent = this._getStudent(oEvent);
@@ -189,10 +161,10 @@ sap.ui.define([
       }
       this._coursesStudent = oStudent;
       var that = this;
-      this._callOData(this._studentPath(oStudent.ID) + "getEnrolledCourses", "GET")
+      this.callStudentService(this._studentPath(oStudent.ID) + "getEnrolledCourses()", "GET")
         .then(function (aCourses) {
           that._localModel.setProperty("/courses", aCourses || []);
-          that.byId("enrolledCoursesDialog").setTitle("Enrolled Courses - " + oStudent.Name);
+          that.byId("enrolledCoursesDialog").setTitle(that.t("enrolledCoursesOf", [oStudent.Name]));
           that.byId("enrolledCoursesDialog").open();
         })
         .catch(function () { /* already reported */ });
@@ -205,10 +177,10 @@ sap.ui.define([
         return;
       }
       var that = this;
-      this._callOData(this._studentPath(oStudent.ID) + "dropCourse", "POST", {
+      this.callStudentService(this._studentPath(oStudent.ID) + "dropCourse", "POST", {
         courseCode: oCourse.code
       }).then(function () {
-        MessageToast.show("Dropped " + oCourse.code);
+        MessageToast.show(that.t("droppedCourse", [oCourse.code]));
         that._localModel.setProperty("/courses", that._localModel.getProperty("/courses").filter(function (c) {
           return c.code !== oCourse.code;
         }));
@@ -221,9 +193,10 @@ sap.ui.define([
       if (!oStudent) {
         return;
       }
-      this._callOData(this._studentPath(oStudent.ID) + "getAverageCredits", "GET")
+      var that = this;
+      this.callStudentService(this._studentPath(oStudent.ID) + "getAverageCredits()", "GET")
         .then(function (nAverage) {
-          MessageToast.show(oStudent.Name + " - average credits: " + nAverage);
+          MessageToast.show(that.t("averageCreditsOf", [oStudent.Name, nAverage]));
         })
         .catch(function () { /* already reported */ });
     },
@@ -246,11 +219,11 @@ sap.ui.define([
       }
       var sDepartment = this.byId("changeDepartmentSelect").getSelectedKey();
       var that = this;
-      this._callOData(this._studentPath(oStudent.ID) + "changeDepartment", "POST", {
+      this.callStudentService(this._studentPath(oStudent.ID) + "changeDepartment", "POST", {
         Department: sDepartment
       }).then(function () {
         that.byId("changeDepartmentDialog").close();
-        MessageToast.show("Department changed to " + sDepartment);
+        MessageToast.show(that.t("departmentChanged", [sDepartment]));
         that.onRefresh();
       }).catch(function () { /* already reported */ });
     },
@@ -260,9 +233,10 @@ sap.ui.define([
     },
 
     onStudentCount: function () {
-      this._callOData("getStudentCount()", "GET")
+      var that = this;
+      this.callStudentService("getStudentCount()", "GET")
         .then(function (nCount) {
-          MessageToast.show("Total students: " + nCount);
+          MessageToast.show(that.t("totalStudents", [nCount]));
         })
         .catch(function () { /* already reported */ });
     },
@@ -270,16 +244,16 @@ sap.ui.define([
     onOpenDepartmentDialog: function () {
       this._localModel.setProperty("/departmentStudents", []);
       this.byId("departmentDialog").open();
+      this.onSearchByDepartment();
     },
 
     onSearchByDepartment: function () {
       var sDepartment = this.byId("departmentSearchSelect").getSelectedKey();
       if (!sDepartment) {
-        MessageBox.warning("Please select a department.");
         return;
       }
       var that = this;
-      this._callOData("getStudentsByDepartment(department='" + encodeURIComponent(sDepartment) + "')", "GET")
+      this.callStudentService("getStudentsByDepartment(department='" + encodeURIComponent(sDepartment) + "')", "GET")
         .then(function (aStudents) {
           that._localModel.setProperty("/departmentStudents", aStudents || []);
         })
@@ -296,29 +270,30 @@ sap.ui.define([
         return;
       }
       this._enrollStudent = oStudent;
-      this.byId("enrollStudentName").setText("Student: " + oStudent.Name);
-      this.byId("courseSelect").setSelectedKey("");
+      this.byId("enrollStudentName").setText(oStudent.Name);
+      this.byId("courseSelect").setSelectedKey(null).setValue("");
       this.byId("enrollDialog").open();
     },
 
     onEnroll: function () {
       var sCourseCode = this.byId("courseSelect").getSelectedKey();
       if (!sCourseCode) {
-        MessageBox.warning("Please select a course.");
+        this.byId("courseSelect").setValueState("Error").setValueStateText(this.t("pickCourse"));
         return;
       }
+      this.byId("courseSelect").setValueState("None");
       var that = this;
-      this._callOData(this._studentPath(this._enrollStudent.ID) + "enrollToCourse", "POST", {
+      this.callStudentService(this._studentPath(this._enrollStudent.ID) + "enrollToCourse", "POST", {
         courseCode: sCourseCode
       }).then(function () {
         that.byId("enrollDialog").close();
-        MessageToast.show("Enrolled in " + sCourseCode);
+        MessageToast.show(that.t("enrolledIn", [sCourseCode]));
         that.onRefresh();
       }).catch(function () { /* already reported */ });
     },
 
     onGraduate: function (oEvent) {
-      this._runOnStudent(oEvent, "graduateStudent", "Student graduated");
+      this._runOnStudent(oEvent, "graduateStudent", this.t("studentGraduated"));
     },
 
     onToggleSuspend: function (oEvent) {
@@ -327,9 +302,9 @@ sap.ui.define([
         return;
       }
       if (oStudent.status === "Suspended") {
-        this._runOnStudent(oEvent, "activateStudent", "Student activated");
+        this._runOnStudent(oEvent, "activateStudent", this.t("studentActivated"));
       } else {
-        this._runOnStudent(oEvent, "suspendStudent", "Student suspended");
+        this._runOnStudent(oEvent, "suspendStudent", this.t("studentSuspended"));
       }
     },
 
@@ -339,17 +314,20 @@ sap.ui.define([
         return;
       }
       var that = this;
-      MessageBox.confirm("Delete " + oStudent.Name + "?", {
-        title: "Delete Student",
+      MessageBox.warning(this.t("confirmDeleteStudent", [oStudent.Name]), {
+        title: this.t("deleteTitle"),
+        actions: [MessageBox.Action.DELETE, MessageBox.Action.CANCEL],
+        emphasizedAction: MessageBox.Action.DELETE,
         onClose: function (sAction) {
-          if (sAction === MessageBox.Action.OK) {
-            that._callOData(that._studentPath(oStudent.ID) + "deleteStudent", "POST", {})
-              .then(function () {
-                MessageToast.show("Student deleted");
-                that.onRefresh();
-              })
-              .catch(function () { /* already reported */ });
+          if (sAction !== MessageBox.Action.DELETE) {
+            return;
           }
+          that.callStudentService(that._studentPath(oStudent.ID) + "deleteStudent", "POST", {})
+            .then(function () {
+              MessageToast.show(that.t("studentDeleted"));
+              that.onRefresh();
+            })
+            .catch(function () { /* already reported */ });
         }
       });
     },
@@ -364,12 +342,18 @@ sap.ui.define([
       this.byId("enrolledCoursesDialog").close();
     },
 
+    _resetFormStates: function () {
+      ["newName", "newEmail", "newBpNumber"].forEach(function (sId) {
+        this.byId(sId).setValueState("None");
+      }, this);
+    },
+
     onOpenCreateDialog: function () {
       this._editingStudent = null;
-      this.byId("createDialog").setTitle("New Student");
-      this.byId("createDialog").getBeginButton().setText("Create");
-      this.byId("newId").setEditable(true);
-      this.byId("newId").setValue("");
+      this._resetFormStates();
+      this.byId("createDialog").setTitle(this.t("createStudent"));
+      this.byId("createDialog").getBeginButton().setText(this.t("create"));
+      this.byId("newId").setEditable(true).setValue("");
       this.byId("newName").setValue("");
       this.byId("newEmail").setValue("");
       this.byId("newDepartment").setSelectedKey("CSE");
@@ -384,10 +368,10 @@ sap.ui.define([
         return;
       }
       this._editingStudent = oStudent;
-      this.byId("createDialog").setTitle("Edit Student - " + oStudent.Name);
-      this.byId("createDialog").getBeginButton().setText("Save");
-      this.byId("newId").setEditable(false);
-      this.byId("newId").setValue(oStudent.ID);
+      this._resetFormStates();
+      this.byId("createDialog").setTitle(this.t("editStudentOf", [oStudent.Name]));
+      this.byId("createDialog").getBeginButton().setText(this.t("save"));
+      this.byId("newId").setEditable(false).setValue(oStudent.ID);
       this.byId("newName").setValue(oStudent.Name);
       this.byId("newEmail").setValue(oStudent.Email);
       this.byId("newDepartment").setSelectedKey(oStudent.department);
@@ -402,7 +386,7 @@ sap.ui.define([
 
     onSaveNewStudent: function () {
       var oPayload = {
-        ID: this.byId("newId").getValue().trim(),
+        ID: this.byId("newId").getValue().trim() || (this._editingStudent ? "" : window.crypto.randomUUID()),
         name: this.byId("newName").getValue().trim(),
         email: this.byId("newEmail").getValue().trim(),
         department: this.byId("newDepartment").getSelectedKey(),
@@ -410,16 +394,22 @@ sap.ui.define([
         bpNumber: this.byId("newBpNumber").getValue().trim()
       };
 
-      if (!oPayload.ID || !oPayload.name || !oPayload.email || !oPayload.bpNumber) {
-        MessageBox.warning("ID, name, email and BP number are required.");
+      var bValid = true;
+      var fnCheck = function (sId, bOk, sMessageKey) {
+        this.byId(sId).setValueState(bOk ? "None" : "Error").setValueStateText(bOk ? "" : this.t(sMessageKey));
+        bValid = bValid && bOk;
+      }.bind(this);
+      fnCheck("newName", !!oPayload.name, "requiredField");
+      fnCheck("newEmail", EMAIL_PATTERN.test(oPayload.email), "invalidEmail");
+      fnCheck("newBpNumber", !!oPayload.bpNumber, "requiredField");
+      if (!bValid) {
         return;
       }
 
       var bEditing = !!this._editingStudent;
-      var sAction = bEditing ? "updateStudent" : "createStudent";
-      var sMessage = bEditing ? "Student updated" : "Student created";
+      var sMessage = this.t(bEditing ? "studentUpdated" : "studentCreated");
       var that = this;
-      this._callOData(sAction, "POST", oPayload)
+      this.callStudentService(bEditing ? "updateStudent" : "createStudent", "POST", oPayload)
         .then(function () {
           that.byId("createDialog").close();
           MessageToast.show(sMessage);

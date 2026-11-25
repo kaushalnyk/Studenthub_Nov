@@ -1,8 +1,7 @@
 sap.ui.define([
-  "sap/ui/core/mvc/Controller",
-  "sap/m/MessageToast",
-  "sap/m/MessageBox"
-], function (Controller, MessageToast, MessageBox) {
+  "studenthub/nov/controller/BaseController",
+  "sap/m/MessageToast"
+], function (Controller, MessageToast) {
   "use strict";
 
   var SERVICE_PATH = "/odata/v4/david-s4/";
@@ -12,6 +11,7 @@ sap.ui.define([
     onInit: function () {
       this._bpModel = this.getOwnerComponent().getModel("bp");
       this._bpModel.setData({ partners: [], details: {} });
+      this.markNav("bpPage", "businessPartners");
       this._loadPartners();
     },
 
@@ -25,8 +25,16 @@ sap.ui.define([
 
     /* ---------- OData helper ---------- */
 
+    formatCategory: function (sCategory) {
+      if (sCategory === "1") {
+        return this.t("person");
+      }
+      return sCategory === "2" ? this.t("organization") : (sCategory || "");
+    },
+
     _callS4: function (sPath, sMethod, oData) {
-      var that = this;
+      var oTable = this.byId("bpTable");
+      oTable.setBusy(true);
       return fetch(SERVICE_PATH + sPath, {
         method: sMethod || "POST",
         headers: {
@@ -47,6 +55,8 @@ sap.ui.define([
       }).catch(function (oError) {
         MessageToast.show(oError.message || "S/4 service call failed");
         throw oError;
+      }).finally(function () {
+        oTable.setBusy(false);
       });
     },
 
@@ -54,15 +64,13 @@ sap.ui.define([
       var sUrl = "DavidBusinessPartners?$top=50" + (sFilter ? "&$filter=" + sFilter : "");
       var that = this;
       return this._callS4(sUrl, "GET").then(function (oData) {
-        that._bpModel.setProperty("/partners", (oData && oData.value) || []);
-        that.byId("bpCountText").setText(((oData && oData.value) || []).length + " partners");
+        that._setPartners(oData);
       }).catch(function () { /* already reported */ });
     },
 
     _setPartners: function (oData) {
       var aPartners = (oData && oData.value) || [];
       this._bpModel.setProperty("/partners", aPartners);
-      this.byId("bpCountText").setText(aPartners.length + " partners");
     },
 
     _bpPath: function (sId) {
@@ -79,7 +87,7 @@ sap.ui.define([
     onSearchName: function (oEvent) {
       var sName = (oEvent.getSource().getValue() || "").trim();
       var sFilter = sName
-        ? "contains(BusinessPartnerFullName,'" + encodeURIComponent(sName) + "')"
+        ? "contains(BusinessPartnerFullName,'" + encodeURIComponent(sName.replace(/'/g, "''")) + "')"
         : "";
       this._loadPartners(sFilter);
     },
@@ -109,7 +117,7 @@ sap.ui.define([
     },
 
     onOpenUuidDialog: function () {
-      this.byId("bpUuidInput").setValue("");
+      this.byId("bpUuidInput").setValue("").setValueState("None");
       this.byId("bpUuidDialog").open();
     },
 
@@ -120,7 +128,7 @@ sap.ui.define([
     onSearchByUuid: function () {
       var sUuid = this.byId("bpUuidInput").getValue().trim();
       if (!sUuid) {
-        MessageBox.warning("Please enter a UUID.");
+        this.byId("bpUuidInput").setValueState("Error").setValueStateText(this.t("requiredField"));
         return;
       }
       var that = this;
@@ -154,10 +162,11 @@ sap.ui.define([
       if (!oPartner) {
         return;
       }
+      var that = this;
       this._callS4(this._bpPath(oPartner.BusinessPartner) + "getBusinessPartnerName", "POST", {
         BusinessPartner: oPartner.BusinessPartner
       }).then(function (sName) {
-        MessageToast.show("Name: " + sName);
+        MessageToast.show(that.t("bpNameIs", [sName]));
       }).catch(function () { /* already reported */ });
     },
 
@@ -166,10 +175,11 @@ sap.ui.define([
       if (!oPartner) {
         return;
       }
+      var that = this;
       this._callS4(this._bpPath(oPartner.BusinessPartner) + "checkBusinessPartnerExists", "POST", {
         BusinessPartner: oPartner.BusinessPartner
       }).then(function (bExists) {
-        MessageToast.show(bExists ? "Business partner exists" : "Business partner not found");
+        MessageToast.show(that.t(bExists ? "bpExists" : "bpNotFound"));
       }).catch(function () { /* already reported */ });
     },
 

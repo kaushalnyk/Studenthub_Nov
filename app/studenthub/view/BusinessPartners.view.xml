@@ -3,100 +3,120 @@
   xmlns:mvc="sap.ui.core.mvc"
   xmlns:m="sap.m"
   xmlns:core="sap.ui.core"
+  xmlns:f="sap.ui.layout.form"
   displayBlock="true">
 
-  <m:Page id="bpPage" title="{i18n>businessPartnersTitle}" showNavButton="true" navButtonPress="onNavBack" class="studentHubShell">
+  <m:Page id="bpPage" title="{i18n>businessPartnersTitle}" class="studentHubShell">
 
     <m:headerContent>
-      <m:Toolbar>
+      <core:Fragment fragmentName="studenthub.nov.view.Nav" type="XML" />
+    </m:headerContent>
+
+    <m:content>
+      <m:VBox class="hubHero">
+        <m:Title text="{i18n>bpHeroTitle}" level="H1" titleStyle="H2" wrapping="true" />
+        <m:Text text="{i18n>bpHeroText}" class="hubHeroText" />
+      </m:VBox>
+
+      <m:OverflowToolbar class="hubFilterBar">
         <m:SearchField
           id="bpSearch"
-          width="15rem"
+          width="16rem"
           placeholder="{i18n>bpSearchPlaceholder}"
           search="onSearchName" />
         <m:Select id="bpCategory" width="10rem" change="onCategoryChange">
           <m:items>
-            <core:Item key="" text="{i18n>allCategories}" />
-            <core:Item key="1" text="{i18n>person}" />
-            <core:Item key="2" text="{i18n>organization}" />
+            <core:ListItem key="" text="{i18n>allCategories}" icon="sap-icon://filter" />
+            <core:ListItem key="1" text="{i18n>person}" icon="sap-icon://person-placeholder" />
+            <core:ListItem key="2" text="{i18n>organization}" icon="sap-icon://building" />
           </m:items>
         </m:Select>
-        <m:Input id="latestCount" width="4rem" value="10" type="Number" />
-        <m:Button text="{i18n>latest}" icon="sap-icon://history" press="onLatest" />
-        <m:Button text="{i18n>byUUID}" icon="sap-icon://search" press="onOpenUuidDialog" />
+        <m:ToolbarSeparator />
+        <m:StepInput id="latestCount" width="7rem" min="1" max="50" value="10" tooltip="{i18n>latestCountTooltip}" />
+        <m:Button text="{i18n>latest}" icon="sap-icon://history" type="Transparent" press="onLatest" />
+        <m:Button text="{i18n>byUUID}" icon="sap-icon://search" type="Transparent" press="onOpenUuidDialog" />
         <m:ToolbarSpacer />
-        <m:Button icon="sap-icon://refresh" tooltip="{i18n>refresh}" press="onRefresh" />
-      </m:Toolbar>
-    </m:headerContent>
+        <m:Button type="Transparent" icon="sap-icon://refresh" tooltip="{i18n>refresh}" press="onRefresh" />
+      </m:OverflowToolbar>
 
-    <m:content>
-      <m:Table id="bpTable" width="100%" growing="true" items="{bp>/partners}" noDataText="No business partners found">
-        <m:headerToolbar>
-          <m:OverflowToolbar>
-            <m:Title text="{i18n>businessPartnersTitle}" level="H2" />
-            <m:ToolbarSpacer />
-            <m:Text id="bpCountText" text="" />
-          </m:OverflowToolbar>
-        </m:headerToolbar>
-        <m:columns>
-          <m:Column width="10rem"><m:Text text="{i18n>businessPartner}" /></m:Column>
-          <m:Column><m:Text text="{i18n>name}" /></m:Column>
-          <m:Column width="8rem"><m:Text text="{i18n>category}" /></m:Column>
-          <m:Column width="20rem"><m:Text text="{i18n>uuid}" /></m:Column>
-          <m:Column width="9rem"><m:Text text="{i18n>created}" /></m:Column>
-          <m:Column width="13rem"><m:Text text="{i18n>actions}" /></m:Column>
-        </m:columns>
-        <m:items>
-          <m:ColumnListItem vAlign="Middle">
-            <m:cells>
-              <m:Text text="{bp>BusinessPartner}" />
-              <m:Text text="{bp>BusinessPartnerFullName}" />
-              <m:Text text="{bp>BusinessPartnerCategory}" />
-              <m:Text text="{bp>BusinessPartnerUUID}" />
-              <m:Text text="{bp>CreationDate}" />
-              <m:Toolbar class="detailIconButton">
-                <m:Button icon="sap-icon://detail-view" tooltip="Details" press="onBpDetails" />
-                <m:Button icon="sap-icon://text" tooltip="Get name" press="onBpName" />
-                <m:Button icon="sap-icon://sys-enter-2" tooltip="Check existence" press="onBpExists" />
-              </m:Toolbar>
-            </m:cells>
-          </m:ColumnListItem>
-        </m:items>
-      </m:Table>
+      <m:VBox class="hubCard">
+        <m:Table id="bpTable" width="auto" growing="true" growingThreshold="20" busyIndicatorDelay="0" items="{bp>/partners}">
+          <m:headerToolbar>
+            <m:OverflowToolbar>
+              <m:Title text="{i18n>navPartners}" level="H2" />
+              <m:ToolbarSpacer />
+              <m:ObjectStatus text="{= ${bp>/partners}.length }" icon="sap-icon://customer" state="Information" inverted="true" />
+            </m:OverflowToolbar>
+          </m:headerToolbar>
+          <m:noData>
+            <m:IllustratedMessage illustrationType="sapIllus-NoSearchResults" illustrationSize="Spot" title="{i18n>noPartners}" description="{i18n>noPartnersHint}" enableVerticalResponsiveness="true" />
+          </m:noData>
+          <m:columns>
+            <m:Column><m:Text text="{i18n>businessPartner}" /></m:Column>
+            <m:Column width="9rem"><m:Text text="{i18n>category}" /></m:Column>
+            <m:Column width="21rem" minScreenWidth="Desktop" demandPopin="true"><m:Text text="{i18n>uuid}" /></m:Column>
+            <m:Column width="8rem" minScreenWidth="Tablet" demandPopin="true"><m:Text text="{i18n>created}" /></m:Column>
+            <m:Column width="9rem" hAlign="End"><m:Text text="{i18n>actions}" /></m:Column>
+          </m:columns>
+          <m:items>
+            <m:ColumnListItem vAlign="Middle">
+              <m:cells>
+                <m:HBox alignItems="Center">
+                  <m:Avatar
+                    src="{= ${bp>BusinessPartnerCategory} === '2' ? 'sap-icon://building' : 'sap-icon://person-placeholder' }"
+                    backgroundColor="{= ${bp>BusinessPartnerCategory} === '2' ? 'Accent8' : 'Accent6' }"
+                    displaySize="XS" displayShape="Circle" class="sapUiSmallMarginEnd" />
+                  <m:ObjectIdentifier title="{= ${bp>BusinessPartnerFullName} || '—' }" text="{bp>BusinessPartner}" />
+                </m:HBox>
+                <m:ObjectStatus
+                  text="{path: 'bp>BusinessPartnerCategory', formatter: '.formatCategory'}"
+                  state="{= ${bp>BusinessPartnerCategory} === '2' ? 'Indication08' : 'Indication06' }"
+                  inverted="true" />
+                <m:Text text="{bp>BusinessPartnerUUID}" class="hubMono" />
+                <m:Text text="{path: 'bp>CreationDate', formatter: '.formatDate'}" />
+                <m:HBox class="hubActions" justifyContent="End" wrap="NoWrap">
+                  <m:Button type="Transparent" icon="sap-icon://detail-view" tooltip="{i18n>details}" press="onBpDetails" />
+                  <m:Button type="Transparent" icon="sap-icon://text" tooltip="{i18n>getName}" press="onBpName" />
+                  <m:Button type="Transparent" icon="sap-icon://sys-enter-2" tooltip="{i18n>exists}" press="onBpExists" />
+                </m:HBox>
+              </m:cells>
+            </m:ColumnListItem>
+          </m:items>
+        </m:Table>
+      </m:VBox>
     </m:content>
 
     <m:footer>
       <m:OverflowToolbar>
-        <m:Text text="Data comes from the connected S/4HANA sandbox (API_BUSINESS_PARTNER)." />
+        <core:Icon src="sap-icon://connected" class="sapUiTinyMarginEnd" />
+        <m:Text text="{i18n>bpFooter}" />
       </m:OverflowToolbar>
     </m:footer>
   </m:Page>
 
   <!-- Details dialog -->
-  <m:Dialog id="bpDetailsDialog" title="{i18n>bpDetails}" type="Standard" contentWidth="520px">
+  <m:Dialog id="bpDetailsDialog" title="{i18n>bpDetails}" contentWidth="34rem" icon="sap-icon://customer" class="hubDialog">
     <m:content>
-      <m:VBox class="sapUiSmallMargin">
-        <m:HBox alignItems="Center" class="sapUiTinyMarginBottom">
-          <m:Label text="{i18n>businessPartner}" width="12rem" />
+      <m:HBox alignItems="Center" class="hubDialogHeader">
+        <m:Avatar
+          src="{= ${bp>/details/BusinessPartnerCategory} === '2' ? 'sap-icon://building' : 'sap-icon://person-placeholder' }"
+          backgroundColor="{= ${bp>/details/BusinessPartnerCategory} === '2' ? 'Accent8' : 'Accent6' }"
+          displaySize="M" displayShape="Circle" class="sapUiSmallMarginEnd" />
+        <m:VBox>
+          <m:Title text="{= ${bp>/details/BusinessPartnerFullName} || '—' }" level="H3" wrapping="true" />
+          <m:ObjectStatus text="{path: 'bp>/details/BusinessPartnerCategory', formatter: '.formatCategory'}" state="Information" inverted="true" />
+        </m:VBox>
+      </m:HBox>
+      <f:SimpleForm editable="false" layout="ResponsiveGridLayout" labelSpanM="4" labelSpanL="4" columnsM="1" columnsL="1">
+        <f:content>
+          <m:Label text="{i18n>businessPartner}" />
           <m:Text text="{bp>/details/BusinessPartner}" />
-        </m:HBox>
-        <m:HBox alignItems="Center" class="sapUiTinyMarginBottom">
-          <m:Label text="{i18n>name}" width="12rem" />
-          <m:Text text="{bp>/details/BusinessPartnerFullName}" />
-        </m:HBox>
-        <m:HBox alignItems="Center" class="sapUiTinyMarginBottom">
-          <m:Label text="{i18n>category}" width="12rem" />
-          <m:Text text="{bp>/details/BusinessPartnerCategory}" />
-        </m:HBox>
-        <m:HBox alignItems="Center" class="sapUiTinyMarginBottom">
-          <m:Label text="{i18n>uuid}" width="12rem" />
-          <m:Text text="{bp>/details/BusinessPartnerUUID}" />
-        </m:HBox>
-        <m:HBox alignItems="Center">
-          <m:Label text="{i18n>created}" width="12rem" />
-          <m:Text text="{bp>/details/CreationDate}" />
-        </m:HBox>
-      </m:VBox>
+          <m:Label text="{i18n>uuid}" />
+          <m:Text text="{bp>/details/BusinessPartnerUUID}" class="hubMono" />
+          <m:Label text="{i18n>created}" />
+          <m:Text text="{path: 'bp>/details/CreationDate', formatter: '.formatDate'}" />
+        </f:content>
+      </f:SimpleForm>
     </m:content>
     <m:endButton>
       <m:Button text="{i18n>close}" press="onCloseDetailsDialog" />
@@ -104,14 +124,14 @@
   </m:Dialog>
 
   <!-- UUID search dialog -->
-  <m:Dialog id="bpUuidDialog" title="{i18n>byUUID}" type="Message" contentWidth="480px">
+  <m:Dialog id="bpUuidDialog" title="{i18n>byUUID}" contentWidth="30rem" icon="sap-icon://search" class="hubDialog">
     <m:content>
-      <m:VBox class="sapUiSmallMargin">
-        <m:HBox alignItems="Center">
-          <m:Label text="{i18n>uuid}" width="8rem" />
-          <m:Input id="bpUuidInput" width="22rem" placeholder="{i18n>bpUuidPlaceholder}" />
-        </m:HBox>
-      </m:VBox>
+      <f:SimpleForm editable="true" layout="ResponsiveGridLayout" labelSpanM="3" labelSpanL="3" columnsM="1" columnsL="1">
+        <f:content>
+          <m:Label text="{i18n>uuid}" required="true" />
+          <m:Input id="bpUuidInput" width="100%" placeholder="{i18n>bpUuidPlaceholder}" submit="onSearchByUuid" />
+        </f:content>
+      </f:SimpleForm>
     </m:content>
     <m:beginButton>
       <m:Button text="{i18n>search}" type="Emphasized" press="onSearchByUuid" />

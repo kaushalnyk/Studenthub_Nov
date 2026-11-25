@@ -1,0 +1,9 @@
+<core:FragmentDefinition
+  xmlns="sap.m"
+  xmlns:core="sap.ui.core"
+  xmlns:app="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1">
+  <Button text="{i18n>navStudents}" tooltip="{i18n>navStudents}" icon="sap-icon://group" type="Transparent" class="hubNavBtn" app:route="students" press=".onNav" />
+  <Button text="{i18n>navCourses}" tooltip="{i18n>navCourses}" icon="sap-icon://course-book" type="Transparent" class="hubNavBtn" app:route="courses" press=".onNav" />
+  <Button text="{i18n>navEnrollments}" tooltip="{i18n>navEnrollments}" icon="sap-icon://study-leave" type="Transparent" class="hubNavBtn" app:route="enrollments" press=".onNav" />
+  <Button text="{i18n>navPartners}" tooltip="{i18n>navPartners}" icon="sap-icon://customer" type="Transparent" class="hubNavBtn" app:route="businessPartners" press=".onNav" />
+</core:FragmentDefinition>

@@ -1,0 +1,111 @@
+<mvc:View
+  controllerName="studenthub.nov.controller.Enrollments"
+  xmlns:mvc="sap.ui.core.mvc"
+  xmlns:m="sap.m"
+  xmlns:core="sap.ui.core"
+  xmlns:f="sap.ui.layout.form"
+  displayBlock="true">
+
+  <m:Page id="enrollmentsPage" title="{i18n>enrollmentsTitle}" class="studentHubShell">
+
+    <m:headerContent>
+      <core:Fragment fragmentName="studenthub.nov.view.Nav" type="XML" />
+    </m:headerContent>
+
+    <m:content>
+      <m:OverflowToolbar class="hubFilterBar">
+        <m:SearchField id="enrollSearch" width="16rem" placeholder="{i18n>enrollSearchPlaceholder}" liveChange="onFilter" search="onFilter" />
+        <m:ComboBox id="enrollCourseFilter" width="16rem" placeholder="{i18n>allCourses}" selectionChange="onFilter" items="{path: '/Courses', sorter: {path: 'code'}, templateShareable: false}">
+          <core:ListItem key="{code}" text="{code} · {title}" />
+        </m:ComboBox>
+        <m:Select id="enrollDeptFilter" width="10rem" change="onFilter">
+          <m:items>
+            <core:Item key="" text="{i18n>allDepartments}" />
+            <core:Item key="CSE" text="CSE" />
+            <core:Item key="ECE" text="ECE" />
+            <core:Item key="MBA" text="MBA" />
+          </m:items>
+        </m:Select>
+        <m:Button text="{i18n>clearFilters}" icon="sap-icon://clear-filter" type="Transparent" press="onClearFilters" />
+        <m:ToolbarSpacer />
+        <m:Button icon="sap-icon://refresh" tooltip="{i18n>refresh}" type="Transparent" press="onRefresh" />
+        <m:Button text="{i18n>newEnrollment}" icon="sap-icon://add" type="Emphasized" press="onOpenAdd" />
+      </m:OverflowToolbar>
+
+      <m:VBox class="hubCard">
+        <m:Table
+          id="enrollmentsTable"
+          width="auto"
+          growing="true"
+          growingScrollToLoad="true"
+          updateFinished="onUpdateFinished"
+          items="{
+            path: '/Enrollments',
+            parameters: { $orderby: 'createdAt desc' }
+          }"
+          busyIndicatorDelay="200">
+          <m:noData>
+            <m:IllustratedMessage illustrationType="sapIllus-NoSearchResults" illustrationSize="Spot" title="{i18n>noEnrollments}" description="{i18n>noEnrollmentsFilterHint}" enableVerticalResponsiveness="true" />
+          </m:noData>
+          <m:headerToolbar>
+            <m:OverflowToolbar>
+              <m:Title text="{i18n>navEnrollments}" level="H2" />
+              <m:ToolbarSpacer />
+              <m:ObjectStatus id="enrollCount" text="" state="Information" inverted="true" />
+            </m:OverflowToolbar>
+          </m:headerToolbar>
+          <m:columns>
+            <m:Column><m:Text text="{i18n>student}" /></m:Column>
+            <m:Column width="9rem"><m:Text text="{i18n>department}" /></m:Column>
+            <m:Column><m:Text text="{i18n>course}" /></m:Column>
+            <m:Column width="6rem" hAlign="End" minScreenWidth="Tablet" demandPopin="true"><m:Text text="{i18n>credits}" /></m:Column>
+            <m:Column width="9rem" minScreenWidth="Desktop" demandPopin="true"><m:Text text="{i18n>enrolledOn}" /></m:Column>
+            <m:Column width="7rem" hAlign="End"><m:Text text="{i18n>actions}" /></m:Column>
+          </m:columns>
+          <m:items>
+            <m:ColumnListItem vAlign="Middle">
+              <m:cells>
+                <m:HBox alignItems="Center">
+                  <m:Avatar initials="{path: 'student/Name', formatter: '.formatInitials'}" backgroundColor="{path: 'student/department', formatter: '.formatDeptColor'}" displaySize="XS" displayShape="Circle" class="sapUiSmallMarginEnd" />
+                  <m:ObjectIdentifier title="{student/Name}" text="{student/Email}" titleActive="true" titlePress="onOpenStudent" />
+                </m:HBox>
+                <m:ObjectStatus text="{student/department}" class="hubDeptTag" />
+                <m:HBox alignItems="Center">
+                  <m:ObjectStatus text="{course/code}" state="Information" inverted="true" class="sapUiSmallMarginEnd" />
+                  <m:Text text="{course/title}" />
+                </m:HBox>
+                <m:ObjectNumber number="{course/credits}" unit="cr" />
+                <m:Text text="{path: 'createdAt', targetType: 'any', formatter: '.formatDate'}" />
+                <m:Button icon="sap-icon://decline" text="{i18n>remove}" type="Transparent" class="hubDanger" press="onRemove" />
+              </m:cells>
+            </m:ColumnListItem>
+          </m:items>
+        </m:Table>
+      </m:VBox>
+    </m:content>
+  </m:Page>
+
+  <m:Dialog id="addEnrollmentDialog" title="{i18n>newEnrollment}" contentWidth="30rem" icon="sap-icon://study-leave" class="hubDialog">
+    <m:content>
+      <f:SimpleForm editable="true" layout="ResponsiveGridLayout" labelSpanM="3" labelSpanL="3" columnsM="1" columnsL="1">
+        <f:content>
+          <m:Label text="{i18n>student}" required="true" />
+          <m:ComboBox id="addStudent" width="100%" placeholder="{i18n>pickStudent}" items="{path: '/Students', sorter: {path: 'Name'}, parameters: {$select: ['ID', 'Name', 'department']}, templateShareable: false}">
+            <core:ListItem key="{ID}" text="{Name}" additionalText="{department}" />
+          </m:ComboBox>
+          <m:Label text="{i18n>course}" required="true" />
+          <m:ComboBox id="addCourse" width="100%" placeholder="{i18n>pickCourse}" items="{path: '/Courses', sorter: {path: 'code'}, templateShareable: false}">
+            <core:ListItem key="{code}" text="{code} · {title}" additionalText="{credits} cr" />
+          </m:ComboBox>
+        </f:content>
+      </f:SimpleForm>
+    </m:content>
+    <m:beginButton>
+      <m:Button text="{i18n>enroll}" type="Emphasized" press="onAdd" />
+    </m:beginButton>
+    <m:endButton>
+      <m:Button text="{i18n>cancel}" press="onCloseAdd" />
+    </m:endButton>
+  </m:Dialog>
+
+</mvc:View>

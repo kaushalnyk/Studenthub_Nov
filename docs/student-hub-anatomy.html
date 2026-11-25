@@ -1,0 +1,538 @@
+<title>Student Hub Anatomy</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: sticky left contents rail + single reading column of numbered-by-flow chapters. */
+:root{
+  --bg:#f5f7fb; --surface:#ffffff; --ink:#142033; --muted:#58657a; --line:#dde3ee;
+  --accent:#1b5fc4; --accent-soft:#e3edfb; --code-bg:#eef2f9;
+  --ok:#17803d; --warn:#a15c00; --bad:#b4261e;
+  --f-display:"Space Grotesk",system-ui,sans-serif; --f-body:"Inter",system-ui,sans-serif; --f-mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0e1522; --surface:#151e2e; --ink:#e6ecf7; --muted:#9aa8bf; --line:#27344b;
+    --accent:#6ea8fe; --accent-soft:#1a2c4a; --code-bg:#0f1828;
+    --ok:#4cc380; --warn:#e0a040; --bad:#f0857d; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0e1522; --surface:#151e2e; --ink:#e6ecf7; --muted:#9aa8bf; --line:#27344b;
+  --accent:#6ea8fe; --accent-soft:#1a2c4a; --code-bg:#0f1828;
+  --ok:#4cc380; --warn:#e0a040; --bad:#f0857d; color-scheme:dark;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.65;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1180px;margin:0 auto;padding-block:2.5rem 4rem;display:grid;grid-template-columns:230px minmax(0,1fr);gap:3rem}
+nav.toc{position:sticky;top:calc(env(safe-area-inset-top,0px) + 1.5rem);align-self:start;font-size:.88rem}
+nav.toc h2{font:600 .72rem var(--f-body);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 .75rem}
+nav.toc a{display:block;padding:.28rem 0 .28rem .75rem;color:var(--muted);text-decoration:none;border-left:2px solid var(--line)}
+nav.toc a:hover,nav.toc a:focus-visible{color:var(--accent);border-left-color:var(--accent);outline:none}
+main{min-width:0}
+header.top{margin-bottom:2.5rem}
+.eyebrow{font:500 .75rem var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--accent)}
+h1{font:700 clamp(2rem,5vw,3.1rem)/1.1 var(--f-display);margin:.4rem 0 1rem;text-wrap:balance}
+.lede{font-size:1.1rem;color:var(--muted);max-width:62ch}
+h2.ch{font:700 1.65rem/1.2 var(--f-display);margin:3.5rem 0 .6rem;text-wrap:balance;scroll-margin-top:1.5rem}
+h3{font:600 1.05rem var(--f-display);margin:1.8rem 0 .4rem}
+p{max-width:70ch;margin:.5rem 0}
+code{font:400 .86em var(--f-mono);background:var(--code-bg);padding:.12em .4em;border-radius:4px;overflow-wrap:anywhere}
+.scroll{overflow-x:auto;max-width:100%}
+pre.code{background:var(--code-bg);border:1px solid var(--line);border-radius:8px;padding:1rem;font:400 .83rem/1.55 var(--f-mono);overflow-x:auto;margin:1rem 0}
+.diagram{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:1.25rem;margin:1.25rem 0;overflow-x:auto}
+.diagram pre.mermaid{margin:0;text-align:center;background:none}
+.cap{font-size:.84rem;color:var(--muted);margin-top:.6rem;text-align:left}
+table{border-collapse:collapse;width:100%;font-size:.9rem;background:var(--surface);border:1px solid var(--line)}
+th,td{text-align:left;padding:.6rem .8rem;border-bottom:1px solid var(--line);vertical-align:top}
+th{font:600 .72rem var(--f-body);letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:var(--code-bg)}
+td code{white-space:nowrap}
+.chips{display:flex;flex-wrap:wrap;gap:.5rem;margin:1rem 0}
+.chip{font:500 .8rem var(--f-mono);padding:.25rem .65rem;border-radius:99px;background:var(--accent-soft);color:var(--accent)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:1rem;margin:1.25rem 0}
+.tile{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:1rem 1.1rem}
+.tile b{display:block;font:600 1rem var(--f-display);margin-bottom:.25rem}
+.tile span{font-size:.88rem;color:var(--muted)}
+.note{border:1px solid var(--line);border-left:4px solid var(--warn);background:var(--surface);border-radius:8px;padding:.8rem 1rem;margin:1rem 0;font-size:.93rem}
+.note.good{border-left-color:var(--ok)}
+.note.bad{border-left-color:var(--bad)}
+.note b:first-child{display:block;margin-bottom:.15rem}
+footer{margin-top:4rem;color:var(--muted);font-size:.85rem}
+@media (max-width:860px){.wrap{grid-template-columns:1fr;gap:1rem}nav.toc{position:static}nav.toc a{display:inline-block;border:0;padding:.2rem .6rem .2rem 0}}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+
+<div class="wrap">
+<nav class="toc" aria-label="Contents">
+  <h2>Contents</h2>
+  <a href="#big-picture">The big picture</a>
+  <a href="#layout">Folder layout</a>
+  <a href="#two-index">Why two index.html files</a>
+  <a href="#startup">What happens on page load</a>
+  <a href="#frontend">Front end (UI5)</a>
+  <a href="#design">Look and feel</a>
+  <a href="#url-flow">How a click reaches the backend</a>
+  <a href="#backend">Back end (CAP)</a>
+  <a href="#data">Data model</a>
+  <a href="#actions">Action catalog</a>
+  <a href="#s4">S/4HANA connection</a>
+  <a href="#security">Security and roles</a>
+  <a href="#deploy">Deployment</a>
+  <a href="#trouble">Findings and tips</a>
+</nav>
+
+<main>
+<header class="top">
+  <div class="eyebrow">Studenthub_Nov · SAP CAP + UI5</div>
+  <h1>Student Hub, end to end</h1>
+  <p class="lede">A student administration app. A SAPUI5 front end talks OData V4 to a Node.js CAP back end. The back end stores students, courses and enrollments in a database, and reads Business Partners live from an S/4HANA sandbox.</p>
+  <div class="chips"><span class="chip">SAPUI5 1.120+</span><span class="chip">OData V4</span><span class="chip">@sap/cds 10</span><span class="chip">SQLite (dev) / HANA (prod)</span><span class="chip">XSUAA + App Router</span></div>
+</header>
+
+<h2 class="ch" id="big-picture">The big picture</h2>
+<p>There are three runtime pieces: the browser app, the CAP server, and the data sources behind it. In production an App Router sits in front and handles login and routing. In local development <code>cds watch</code> plays all of those roles in one process.</p>
+
+<div class="diagram"><pre class="mermaid">
+flowchart LR
+  U(["User in browser"])
+  subgraph FE["Front end: app/studenthub"]
+    V["XML views"]
+    C["JS controllers"]
+    M["OData V4 model + JSON models"]
+  end
+  AR["App Router<br/>xs-app.json"]
+  subgraph BE["Back end: CAP Node.js"]
+    SS["StudentService<br/>/odata/v4/student"]
+    DS["DavidS4Service<br/>/odata/v4/david-s4"]
+  end
+  DB[("SQLite dev / SAP HANA prod<br/>Student, Course, Enrollments")]
+  S4["S/4HANA sandbox<br/>API_BUSINESS_PARTNER"]
+  XS["XSUAA<br/>login and roles"]
+  U --> V
+  V --> C --> M
+  M -->|"HTTP /odata/v4/..."| AR
+  AR -->|"JWT forwarded"| SS
+  AR -->|"JWT forwarded"| DS
+  SS --> DB
+  DS -->|"OData V2 + API key"| S4
+  AR <-.->|"OAuth2 login"| XS
+  SS -.->|"validates token"| XS
+</pre><div class="cap">Solid arrows are data requests. Dotted arrows are authentication.</div></div>
+
+<h2 class="ch" id="layout">Folder layout</h2>
+<table>
+<tr><th>Path</th><th>What lives there</th></tr>
+<tr><td><code>app/index.html</code></td><td>Local-only redirect to <code>studenthub/index.html</code> (see <a href="#two-index">why two index.html files</a>)</td></tr>
+<tr><td><code>app/studenthub/</code></td><td>The UI5 app: <code>index.html</code>, <code>Component.js</code>, <code>manifest.json</code>, <code>view/*.xml</code> (5 pages + <code>Nav.fragment.xml</code>), <code>controller/*.js</code> (one per page + <code>BaseController.js</code>), <code>css/style.css</code>, <code>i18n/</code></td></tr>
+<tr><td><code>app/router/</code></td><td>App Router config (<code>xs-app.json</code>) used for local router runs</td></tr>
+<tr><td><code>srv/student-service.cds / .js</code></td><td>Student service definition and its business logic</td></tr>
+<tr><td><code>srv/s4-service.cds / .js</code></td><td>Business Partner service that proxies S/4HANA</td></tr>
+<tr><td><code>srv/external/</code></td><td>Imported S/4 API definition (<code>.edmx</code> and <code>.csn</code>)</td></tr>
+<tr><td><code>db/schema.cds</code> and <code>db/data/*.csv</code></td><td>Entities and seed data loaded on start</td></tr>
+<tr><td><code>mta.yaml</code>, <code>xs-security.json</code></td><td>Cloud Foundry deployment and role definitions</td></tr>
+<tr><td><code>.deploy/app-router/</code></td><td>Build output folder. <code>mta.yaml</code> copies the UI here before packaging</td></tr>
+</table>
+
+<h2 class="ch" id="two-index">Why there are two <code>index.html</code> files</h2>
+<p>They have different jobs, and only one of them ships to the cloud.</p>
+<table>
+<tr><th>File</th><th>What it does</th><th>Used when</th></tr>
+<tr><td><code>app/index.html</code></td><td>A one-line redirect (<code>&lt;meta http-equiv="refresh"&gt;</code>) to <code>studenthub/index.html</code>. No UI5, no app code.</td><td>Only locally. <code>cds watch</code> serves the whole <code>app/</code> folder, so <code>http://localhost:4004/</code> would otherwise show CAP's generic welcome page. This file sends you straight to the app instead.</td></tr>
+<tr><td><code>app/studenthub/index.html</code></td><td>The real app page. Loads UI5 from the CDN, creates the <code>studenthub.nov</code> Component and places it on the page.</td><td>Always: locally at <code>/studenthub/index.html</code> and in production behind the App Router.</td></tr>
+</table>
+<div class="diagram"><pre class="mermaid">
+flowchart LR
+  subgraph LOCAL["Local: cds watch"]
+    L1["localhost:4004/"] --> L2["app/index.html<br/>redirect only"]
+    L2 --> L3["app/studenthub/index.html<br/>boots UI5"]
+  end
+  subgraph CLOUD["Cloud: App Router"]
+    C1["app-router URL /"] -->|"welcomeFile in xs-app.json"| C3["/studenthub/index.html<br/>boots UI5"]
+  end
+</pre><div class="cap">In the cloud the App Router's <code>welcomeFile</code> does the redirect, and <code>mta.yaml</code> copies only <code>app/studenthub/</code>, so <code>app/index.html</code> is never deployed.</div></div>
+<div class="note good"><b>Keep it or delete it, both are safe</b>Deleting <code>app/index.html</code> only means <code>localhost:4004/</code> shows CAP's index page with a link to the app. Edit app code in <code>app/studenthub/index.html</code> only.</div>
+
+<h2 class="ch" id="startup">What happens when you open the app</h2>
+<p>The page address is <code>/studenthub/index.html</code>. Everything after that happens in the browser.</p>
+
+<div class="diagram"><pre class="mermaid">
+sequenceDiagram
+  autonumber
+  participant B as Browser
+  participant R as App Router or cds watch
+  participant CDN as sdk.openui5.org
+  participant S as CAP server
+  B->>R: GET /studenthub/index.html
+  R-->>B: HTML (login first if not signed in)
+  B->>CDN: load sap-ui-core.js, sap.m, sap.ui.layout
+  B->>R: GET Component.js, manifest.json, i18n, views
+  Note over B: manifest.json creates the models and the router
+  B->>S: GET /odata/v4/student/$metadata
+  B->>S: GET /odata/v4/david-s4/$metadata
+  B->>S: GET /odata/v4/student/Students?$count=true&$top=20
+  S-->>B: JSON rows
+  Note over B: Table renders, "N students" label updates
+</pre></div>
+
+<h2 class="ch" id="frontend">Front end (SAPUI5)</h2>
+<p>The UI follows the standard UI5 MVC pattern. Views are XML, controllers are JavaScript, and <code>manifest.json</code> wires everything together declaratively.</p>
+
+<div class="diagram"><pre class="mermaid">
+flowchart TB
+  IDX["index.html<br/>boots UI5, creates Component"]
+  COMP["Component.js<br/>reads manifest, starts router"]
+  MAN["manifest.json<br/>models, routes, targets"]
+  APP["App.view.xml<br/>holds one sap.m.App"]
+  BASE["BaseController.js<br/>nav, callStudentService, shared formatters"]
+  NAV["Nav.fragment.xml<br/>top navigation on every page"]
+  subgraph pages["Pages shown inside the App"]
+    SV["Students"]
+    DV["StudentDetail"]
+    CV["Courses"]
+    EV["Enrollments"]
+    BV["BusinessPartners"]
+  end
+  IDX --> COMP --> MAN
+  MAN --> APP
+  APP -->|"router puts page in"| pages
+  NAV -.->|"included in header"| pages
+  BASE -.->|"every page controller extends"| pages
+  SV -->|"row click"| DV
+  CV -->|"view enrolled students"| EV
+  EV -->|"student name"| DV
+</pre></div>
+
+<h3>Routes</h3>
+<table>
+<tr><th>Browser URL</th><th>Route</th><th>View</th></tr>
+<tr><td><code>/studenthub/index.html#/</code></td><td><code>students</code></td><td>Students</td></tr>
+<tr><td><code>…#/students/{id}</code></td><td><code>studentDetail</code></td><td>StudentDetail</td></tr>
+<tr><td><code>…#/courses</code></td><td><code>courses</code></td><td>Courses</td></tr>
+<tr><td><code>…#/enrollments/{course}</code> (course optional)</td><td><code>enrollments</code></td><td>Enrollments</td></tr>
+<tr><td><code>…#/business-partners</code></td><td><code>businessPartners</code></td><td>BusinessPartners</td></tr>
+</table>
+<p>These are hash routes. Changing the part after <code>#</code> never reloads the page and never reaches the server. Only data calls do.</p>
+
+<h3>Models declared in the manifest</h3>
+<div class="grid">
+  <div class="tile"><b>default (no name)</b><span>OData V4 model on <code>/odata/v4/student/</code>. The Students, Courses and Enrollments tables bind to it directly, so UI5 builds the GET requests, paging and filters for you.</span></div>
+  <div class="tile"><b>s4</b><span>OData V4 model on <code>/odata/v4/david-s4/</code>. Declared, but the Business Partner screen uses <code>fetch</code> instead.</span></div>
+  <div class="tile"><b>local</b><span>Plain JSON model. Holds the KPI tile counts, the enrolled-courses list and department search results shown in dialogs.</span></div>
+  <div class="tile"><b>seats, detail</b><span>View-level JSON models created in code: <code>seats</code> (Courses page seat usage) and <code>detail</code> (StudentDetail courses and credit totals).</span></div>
+  <div class="tile"><b>bp</b><span>JSON model that holds the Business Partner list and the details dialog data, filled by hand from <code>fetch</code> results.</span></div>
+  <div class="tile"><b>i18n</b><span>Text bundle from <code>i18n/i18n.properties</code>, used as <code>{i18n&gt;key}</code> in views.</span></div>
+</div>
+
+<h3>Two ways the UI calls the back end</h3>
+<div class="diagram"><pre class="mermaid">
+flowchart LR
+  subgraph A["Style A: data binding (automatic)"]
+    T["Table items = /Students"] --> OM["OData V4 model"]
+    F["Search or department filter"] --> LB["list binding .filter()"]
+    LB --> OM
+    OM --> G1["GET /Students?$filter=...&$top=20"]
+  end
+  subgraph B["Style B: fetch (manual)"]
+    BTN["Button or menu item press"] --> CO["callStudentService()<br/>in BaseController"]
+    CO --> CSRF["GET $metadata with x-csrf-token: Fetch"]
+    CSRF --> POST["POST or GET with token"]
+  end
+</pre><div class="cap">Reads and filters use model bindings. Every action (suspend, enroll, create, delete and so on) goes through <code>callStudentService</code> in <code>BaseController.js</code>, shared by all pages. The Business Partner page has its own <code>_callS4</code> for the S/4 service.</div></div>
+
+<h2 class="ch" id="design">Look and feel</h2>
+<p>The app uses SAP's <code>sap_horizon</code> theme, with a brand layer on top from <code>css/style.css</code>. All visible text comes from <code>i18n/i18n.properties</code>.</p>
+<div class="grid">
+  <div class="tile"><b>Branded shell</b><span>Gradient blue header with the shared nav. On screens under 1024px the nav collapses to icons; tooltips keep the labels.</span></div>
+  <div class="tile"><b>Hero banners</b><span>Students and Business Partners open with a short welcome banner (<code>.hubHero</code>).</span></div>
+  <div class="tile"><b>KPI tiles</b><span>Coloured accent stripe per status. On Students, a click filters the table; click again to clear.</span></div>
+  <div class="tile"><b>Table cards</b><span>Rounded cards with uppercase headers, status pills with icons, department tags and avatars coloured by department.</span></div>
+  <div class="tile"><b>Tidy row actions</b><span>Students rows show Enroll, Edit, Delete plus a ⋯ menu for the rest. Graduate and Suspend are disabled for graduated students.</span></div>
+  <div class="tile"><b>Empty states</b><span>Tables show an <code>IllustratedMessage</code> with a hint instead of a bare "no data" line.</span></div>
+  <div class="tile"><b>Forms</b><span>Dialogs with icons, segmented buttons for departments, searchable course pickers, inline validation (name max 20, email format).</span></div>
+  <div class="tile"><b>Shared formatters</b><span><code>BaseController</code> holds initials, status colour/icon, department colour and date formatting for every page.</span></div>
+</div>
+
+<h2 class="ch" id="url-flow">How a click becomes a backend call</h2>
+<p>Each action button maps to one OData operation. The URL is built from the selected row's ID, so the server knows which student the action is for.</p>
+
+<div class="diagram"><pre class="mermaid">
+sequenceDiagram
+  autonumber
+  actor U as User
+  participant V as Students.view.xml
+  participant C as Students.controller.js
+  participant R as App Router
+  participant S as StudentService (student-service.js)
+  participant D as Database
+  U->>V: opens ⋯ menu on a row, picks "Suspend"
+  V->>C: press="onToggleSuspend"
+  C->>C: read row via getBindingContext().getObject()
+  C->>R: GET /odata/v4/student/$metadata (fetch CSRF token)
+  R->>S: forwards with login token
+  S-->>C: x-csrf-token header
+  C->>R: POST /odata/v4/student/Students(1111…)/StudentService.suspendStudent
+  R->>S: matches route ^/odata/v4/(.*) and forwards
+  S->>S: check roles, run on('suspendStudent') handler
+  S->>D: SELECT student, UPDATE status = Suspended
+  D-->>S: updated row
+  S-->>C: 200 JSON
+  C->>C: MessageToast "Student suspended", model.refresh(), KPI tiles reload
+  C->>R: GET /Students (table reloads)
+</pre></div>
+
+<h3>URL anatomy</h3>
+<pre class="code">POST /odata/v4/student/Students(1111…)/StudentService.suspendStudent
+     └───┬───┘└──┬───┘└───┬───┘└──┬──┘└─────────────┬──────────────┘
+     protocol service entity set key         namespace + bound action
+              path    (Students) (UUID)      (service, then action)</pre>
+
+<table>
+<tr><th>UI element</th><th>Controller handler</th><th>HTTP request</th><th>CAP handler</th></tr>
+<tr><td>KPI tiles (counts, click to filter)</td><td><code>_loadStats</code> / <code>onKpiPress</code></td><td><code>GET /student/Students?$select=ID,status</code></td><td>built-in READ</td></tr>
+<tr><td>Table load, search, department filter</td><td>model binding / <code>_applyFilters</code></td><td><code>GET /student/Students?$filter=…</code></td><td>built-in READ</td></tr>
+<tr><td>Student Count</td><td><code>onStudentCount</code></td><td><code>GET /student/getStudentCount()</code></td><td><code>getStudentCount</code></td></tr>
+<tr><td>By Department</td><td><code>onSearchByDepartment</code></td><td><code>GET /student/getStudentsByDepartment(department='CSE')</code></td><td><code>getStudentsByDepartment</code></td></tr>
+<tr><td>Create / Edit dialog Save</td><td><code>onSaveNewStudent</code></td><td><code>POST /student/createStudent</code> or <code>updateStudent</code></td><td>same names</td></tr>
+<tr><td>⋯ menu: View enrolled courses</td><td><code>onViewCourses</code></td><td><code>GET …/StudentService.getEnrolledCourses()</code></td><td><code>getEnrolledCourses</code></td></tr>
+<tr><td>Enroll / Drop</td><td><code>onEnroll</code> / <code>onDropCourse</code></td><td><code>POST …/enrollToCourse</code> / <code>dropCourse</code> with <code>{courseCode}</code></td><td>same names</td></tr>
+<tr><td>⋯ menu: Graduate, Suspend, Activate</td><td><code>onGraduate</code> / <code>onToggleSuspend</code></td><td><code>POST …/graduateStudent</code> etc.</td><td>same names</td></tr>
+<tr><td>⋯ menu: Change department</td><td><code>onChangeDepartment</code></td><td><code>POST …/changeDepartment</code> with <code>{Department}</code></td><td><code>changeDepartment</code></td></tr>
+<tr><td>⋯ menu: Average credits</td><td><code>onAverageCredits</code></td><td><code>GET …/getAverageCredits()</code></td><td><code>getAverageCredits</code></td></tr>
+<tr><td>Delete (after confirm)</td><td><code>onDelete</code></td><td><code>POST …/deleteStudent</code></td><td><code>deleteStudent</code></td></tr>
+</table>
+
+<h3>Which URL reaches which server?</h3>
+<div class="diagram"><pre class="mermaid">
+flowchart TD
+  REQ["Incoming request path"] --> Q1{"starts with /studenthub/ ?"}
+  Q1 -->|yes| STATIC["Serve file from resources/ folder<br/>(the UI5 app)"]
+  Q1 -->|no| Q2{"starts with /odata/v4/ ?"}
+  Q2 -->|yes| CAP["Forward to destination srv-api<br/>CAP server"]
+  Q2 -->|no| Q3{"starts with /api/ ?"}
+  Q3 -->|yes| CAP2["Forward to srv-api with /api removed"]
+  Q3 -->|no| CAP3["Catch-all: forward to srv-api"]
+</pre><div class="cap">These are the four routes in <code>app/router/xs-app.json</code>, all with <code>authenticationType: xsuaa</code>.</div></div>
+
+<h2 class="ch" id="backend">Back end (CAP)</h2>
+<p>CAP turns each <code>service</code> in <code>srv/*.cds</code> into an OData V4 endpoint. The <code>.cds</code> file declares what exists (entities, actions, who may call them). The matching <code>.js</code> file supplies the logic through <code>this.on(...)</code>.</p>
+
+<div class="diagram"><pre class="mermaid">
+flowchart LR
+  REQ["HTTP request"] --> PROTO["OData V4 protocol adapter"]
+  PROTO --> AUTH{"Auth + @restrict<br/>allowed?"}
+  AUTH -->|no| E403["403 / 401"]
+  AUTH -->|yes| H{"Custom handler<br/>registered?"}
+  H -->|"yes: this.on('suspendStudent')"| CUSTOM["Run handler in student-service.js"]
+  H -->|"no: plain READ"| GENERIC["Generic CAP handler"]
+  CUSTOM --> DBL["cds.ql: SELECT / INSERT / UPDATE / DELETE"]
+  GENERIC --> DBL
+  DBL --> DBX[("Database")]
+  CUSTOM -->|"req.reject(404, ...)"| ERR["JSON error body<br/>{error:{message}}"]
+</pre></div>
+
+<h3>Handler pattern</h3>
+<p>Almost every bound action in <code>student-service.js</code> follows the same steps, which is why the file reads like a recipe:</p>
+<pre class="code">this.on('suspendStudent', 'Students', async (req) =&gt; {
+  const { ID } = req.params[0];                 // key from the URL
+  const student = await SELECT.one.from(Students).where({ ID });
+  if (!student) return req.reject(404, ...);    // validate
+  if (student.status === 'Graduated') return req.reject(409, ...);
+  await UPDATE(Students).set({ status: 'Suspended' }).where({ ID });
+  return SELECT.one.from(Students).where({ ID });   // return fresh row
+});</pre>
+<p>The front end's <code>callStudentService</code> reads the <code>error.message</code> from a rejected response and shows it as a toast, so these messages are what the user sees.</p>
+
+<h3>Student status lifecycle</h3>
+<div class="diagram"><pre class="mermaid">
+stateDiagram-v2
+  [*] --> Active: createStudent
+  [*] --> Inactive: createStudent
+  Active --> Suspended: suspendStudent
+  Inactive --> Suspended: suspendStudent
+  Suspended --> Active: activateStudent
+  Active --> Graduated: graduateStudent
+  Inactive --> Graduated: graduateStudent
+  Suspended --> Graduated: graduateStudent
+  Graduated --> Graduated: suspend or activate rejected (409)
+</pre></div>
+
+<h3>Enrollment rules (enrollToCourse)</h3>
+<div class="diagram"><pre class="mermaid">
+flowchart TD
+  A["POST enrollToCourse {courseCode}"] --> B{"courseCode sent?"}
+  B -->|no| X1["400 Missing field"]
+  B -->|yes| C{"Student exists?"}
+  C -->|no| X2["404 Student not found"]
+  C -->|yes| D{"Course exists?"}
+  D -->|no| X3["404 Course not found"]
+  D -->|yes| E{"Already enrolled?"}
+  E -->|yes| X4["409 Already enrolled"]
+  E -->|no| F{"Enrollments &lt; capacity?"}
+  F -->|no| X5["409 Course is full"]
+  F -->|yes| G["INSERT Enrollments row"]
+  G --> H["Return the course"]
+</pre></div>
+
+<h2 class="ch" id="data">Data model</h2>
+<div class="diagram"><pre class="mermaid">
+erDiagram
+  Student ||--o{ Enrollments : "has (composition)"
+  Course  ||--o{ Enrollments : "is taken in"
+  Student {
+    UUID ID PK
+    String20 Name
+    String100 Email
+    String50 department
+    String20 status
+    String20 bpNumber
+  }
+  Course {
+    String10 code PK
+    String100 title
+    Integer credits
+    Integer capacity
+    String100 teacher
+  }
+  Enrollments {
+    UUID ID PK
+    UUID student_ID FK
+    String10 course_code FK
+  }
+</pre><div class="cap"><code>Student</code> and <code>Course</code> carry the <code>managed</code> aspect (createdAt, createdBy, modifiedAt, modifiedBy). <code>Enrollments</code> uses <code>cuid</code> and <code>managed</code>. Seed rows come from <code>db/data/*.csv</code>.</div></div>
+<p>The service exposes these as <code>Students</code>, <code>Courses</code> and <code>Enrollments</code>, which are projections on the database entities. The UI binds to the projection names, never to the table names.</p>
+
+<h2 class="ch" id="actions">Action catalog</h2>
+<h3>StudentService &nbsp;<code>/odata/v4/student/</code></h3>
+<div class="scroll"><table>
+<tr><th>Operation</th><th>Kind</th><th>Scope</th><th>Returns</th></tr>
+<tr><td><code>Students</code>, <code>Courses</code>, <code>Enrollments</code></td><td>entity sets</td><td>CRUD via <code>@restrict</code></td><td>rows</td></tr>
+<tr><td><code>createStudent</code>, <code>updateStudent</code></td><td>unbound action</td><td>service</td><td>Student</td></tr>
+<tr><td><code>getStudentCount</code>, <code>getStudentsByDepartment</code></td><td>unbound function</td><td>service</td><td>Integer / list</td></tr>
+<tr><td><code>changeDepartment</code>, <code>suspendStudent</code>, <code>activateStudent</code>, <code>graduateStudent</code></td><td>bound action</td><td>one Student</td><td>Student</td></tr>
+<tr><td><code>enrollToCourse</code>, <code>dropCourse</code>, <code>deleteStudent</code></td><td>bound action</td><td>one Student</td><td>Course / Boolean</td></tr>
+<tr><td><code>getEnrolledCourses</code>, <code>getAverageCredits</code></td><td>bound function</td><td>one Student</td><td>list / Decimal</td></tr>
+</table></div>
+<p><b>Action vs function:</b> functions are read-only and called with GET. Actions change data and are called with POST.</p>
+
+<h3>DavidS4Service &nbsp;<code>/odata/v4/david-s4/</code></h3>
+<div class="scroll"><table>
+<tr><th>Operation</th><th>Kind</th><th>Used by the UI?</th></tr>
+<tr><td><code>DavidBusinessPartners</code> (read with <code>$top</code>, <code>$filter</code>)</td><td>entity set</td><td>Yes: list and name search</td></tr>
+<tr><td><code>getBusinessPartnerDetails</code>, <code>getBusinessPartnerName</code>, <code>checkBusinessPartnerExists</code></td><td>bound action</td><td>Yes: row buttons</td></tr>
+<tr><td><code>getBusinessPartnersByCategory</code>, <code>getLatestBusinessPartners</code>, <code>getBusinessPartnerByUUID</code></td><td>unbound action</td><td>Yes: category, Latest, By UUID</td></tr>
+<tr><td><code>searchBusinessPartnersByName</code></td><td>unbound action</td><td>No: the UI filters with <code>$filter=contains(...)</code> instead</td></tr>
+</table></div>
+
+<h2 class="ch" id="s4">S/4HANA connection</h2>
+<p>The Business Partners screen never talks to S/4HANA directly. It calls <code>DavidS4Service</code>, which forwards the request through CAP's remote service client. That keeps the API key on the server.</p>
+
+<div class="diagram"><pre class="mermaid">
+sequenceDiagram
+  autonumber
+  participant UI as BusinessPartners.controller.js
+  participant CAP as DavidS4Service
+  participant X as cds.connect.to('API_BUSINESS_PARTNER')
+  participant S4 as sandbox.api.sap.com (S/4HANA Cloud)
+  UI->>CAP: GET /DavidBusinessPartners?$top=50
+  CAP->>CAP: on('READ') returns s4.run(req.query)
+  CAP->>X: translate CQN to OData V2
+  X->>S4: GET A_BusinessPartner?$top=50 + APIKey header
+  S4-->>X: OData V2 JSON
+  X-->>CAP: rows
+  CAP-->>UI: OData V4 JSON {value:[...]}
+  UI->>UI: bp model gets /partners, table renders
+</pre></div>
+<p>Because the entity is a projection on an external service, it has no database table. That is why the service needs its own <code>on('READ')</code> handler. Without it, CAP would try to read a table that does not exist.</p>
+
+<div class="diagram"><pre class="mermaid">
+flowchart LR
+  Y1["Name box (search)"] -->|"$filter=contains(...)"| R1["READ handler"]
+  Y2["Category select"] -->|"POST getBusinessPartnersByCategory"| R2["unbound action"]
+  Y3["Latest N"] -->|"POST getLatestBusinessPartners"| R2
+  Y4["By UUID dialog"] -->|"POST getBusinessPartnerByUUID"| R2
+  Y5["Row: Details / Name / Exists"] -->|"POST .../DavidS4Service.action"| R3["bound action"]
+  R1 --> S4Q["s4.run(query)"]
+  R2 --> S4Q
+  R3 --> S4Q
+  S4Q --> S4X["S/4HANA sandbox"]
+</pre></div>
+
+<h2 class="ch" id="security">Security and roles</h2>
+<p>In production, XSUAA issues a login token. The App Router forwards it and CAP checks the user's roles against <code>@requires</code> and <code>@restrict</code>. In development the same roles come from mocked users in <code>package.json</code>.</p>
+
+<div class="diagram"><pre class="mermaid">
+sequenceDiagram
+  participant B as Browser
+  participant AR as App Router
+  participant X as XSUAA
+  participant S as CAP (xssec)
+  B->>AR: GET /studenthub/index.html
+  AR-->>B: 302 redirect to XSUAA login
+  B->>X: sign in
+  X-->>AR: authorization code, then JWT
+  AR-->>B: session cookie
+  B->>AR: GET /odata/v4/student/Students
+  AR->>S: forwards request + JWT
+  S->>S: validate token, map scopes to roles
+  S-->>B: data, or 403 if role missing
+</pre></div>
+
+<table>
+<tr><th>Role</th><th>Local dev user</th><th>Role collection (cloud)</th><th>Inherits</th></tr>
+<tr><td><code>User</code></td><td>Venkat, David</td><td>User (Studenthub_Nov …)</td><td>read access, average credits</td></tr>
+<tr><td><code>Manager</code></td><td>Kaushal</td><td>Manager (…)</td><td>User scope as well</td></tr>
+<tr><td><code>Admin</code></td><td>Nagarjuna</td><td>Admin (…)</td><td>Manager and User scopes</td></tr>
+</table>
+<p>The service has <code>@requires: ['User','Manager','Admin']</code>, so anyone with one of those roles may call it. Inside, <code>Students</code> grants <code>READ</code> and <code>getAverageCredits</code> to <code>User</code>, and everything to <code>Admin</code>. <code>graduateStudent</code> needs Manager or Admin. <code>deleteStudent</code> needs Admin.</p>
+<p>The UI shows every button to everyone. A <code>User</code> who presses Delete gets a 403 and the error appears as a toast.</p>
+
+<h2 class="ch" id="deploy">Deployment</h2>
+<p><code>mta.yaml</code> describes three modules and three cloud services. The build first compiles CAP and copies the UI into <code>.deploy/app-router/resources/studenthub</code>, so the App Router serves the UI itself.</p>
+
+<div class="diagram"><pre class="mermaid">
+flowchart TB
+  subgraph MTA["MTA archive (mta.yaml)"]
+    M1["Studenthub_Nov (approuter.nodejs)<br/>serves UI + routes traffic"]
+    M2["Studenthub_Nov-srv (nodejs)<br/>CAP server from gen/srv"]
+    M3["Studenthub_Nov-db-deployer (hdb)<br/>creates tables in HANA"]
+  end
+  subgraph SVC["Cloud services"]
+    R1[("xsuaa<br/>Studenthub_Nov-auth")]
+    R2[("HANA HDI container<br/>Studenthub_Nov-db")]
+    R3[("destination<br/>Studenthub_Nov-destination")]
+  end
+  M1 -->|"srv-api destination"| M2
+  M1 --> R1
+  M2 --> R1
+  M2 --> R2
+  M3 --> R2
+  M2 --> R3
+</pre></div>
+
+<h3>Run it locally</h3>
+<pre class="code">npm install
+npx cds watch          # serves the API and the UI from app/
+# open http://localhost:4004/studenthub/index.html
+# sign in with a mocked user, for example Nagarjuna / Nagarjuna (Admin)
+
+# try the API directly (see test.http):
+curl -u Nagarjuna:Nagarjuna http://localhost:4004/odata/v4/student/Students</pre>
+
+<h3>Build and deploy</h3>
+<pre class="code">mbt build
+cf deploy mta_archives/Studenthub_Nov_1.0.0.mtar</pre>
+
+<h2 class="ch" id="trouble">Findings and tips</h2>
+<div class="note bad"><b>API key is stored in package.json</b>The S/4 sandbox <code>APIKey</code> is written in plain text under <code>cds.requires</code> and is committed to git. Move it to an environment variable or a <code>.cdsrc-private.json</code> that is git-ignored, and rotate the key.</div>
+<div class="note"><b>Name is limited to 20 characters</b><code>Student.Name</code> is <code>String(20)</code>. The create/edit dialog now stops input at 20 characters, but names such as "Venkatasubramanian Iyer" still cannot be stored in full. Raise the length in <code>db/schema.cds</code> (and the input's <code>maxLength</code>) if you expect long names.</div>
+<div class="note"><b>Manager is not in the Students <code>@restrict</code></b>The entity grants only <code>User</code> and <code>Admin</code>, while <code>graduateStudent</code> asks for Manager or Admin. Test with the Kaushal user to confirm a Manager can graduate a student. If not, add a grant for <code>Manager</code>.</div>
+<div class="note"><b>UI does not hide buttons by role</b>Everyone sees Delete and New Student. The server rejects them correctly. If you want a cleaner experience, expose the user's roles to the UI and bind <code>visible</code> on those buttons.</div>
+<div class="note"><b>OData V4 models need <code>operationMode: "Server"</code></b>Without it, any table with a <code>sorter</code> or a <code>.filter()</code> call fails with "Unsupported operation mode" and the page stays blank. Both V4 models in <code>manifest.json</code> set it.</div>
+<div class="note"><b>Use <code>targetType: 'any'</code> in V4 expressions</b>With the V4 model, <code>${status}</code> inside <code>{= … }</code> is first converted to the control property's type (e.g. boolean for <code>enabled</code>) and throws. Write <code>${path: 'status', targetType: 'any'}</code>.</div>
+<div class="note"><b>The <code>.deploy</code> folder is a copy</b><code>mta.yaml</code> refreshes it on every build. Edit files under <code>app/studenthub</code> only.</div>
+<div class="note good"><b>Good habits already in place</b>Server-side validation with clear HTTP codes, bound actions keyed by the row ID, one shared service helper with a CSRF token fetch before writes, all UI texts in i18n, and the S/4 key kept behind the CAP server instead of in the browser.</div>
+
+<footer>Generated from the repository source. Diagrams use Mermaid and follow your light or dark theme.</footer>
+</main>
+</div>

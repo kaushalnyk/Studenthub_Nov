@@ -40,7 +40,8 @@
       "minUI5Version": "1.120.0",
       "libs": {
         "sap.ui.core": {},
-        "sap.m": {}
+        "sap.m": {},
+        "sap.ui.layout": {}
       }
     },
     "contentDensities": {
@@ -68,7 +69,8 @@
         "settings": {
           "odataVersion": "4.0",
           "autoExpandSelect": true,
-          "earlyRequests": true
+          "earlyRequests": true,
+          "operationMode": "Server"
         }
       },
       "": {
@@ -77,7 +79,8 @@
         "settings": {
           "odataVersion": "4.0",
           "autoExpandSelect": true,
-          "earlyRequests": true
+          "earlyRequests": true,
+          "operationMode": "Server"
         }
       }
     },
@@ -88,7 +91,7 @@
         "viewPath": "studenthub.nov.view",
         "controlId": "app",
         "controlAggregation": "pages",
-        "transition": "slide",
+        "transition": "fade",
         "async": true
       },
       "routes": [
@@ -98,9 +101,19 @@
           "target": "students"
         },
         {
+          "pattern": "students/{id}",
+          "name": "studentDetail",
+          "target": "studentDetail"
+        },
+        {
           "pattern": "courses",
           "name": "courses",
           "target": "courses"
+        },
+        {
+          "pattern": "enrollments/:course:",
+          "name": "enrollments",
+          "target": "enrollments"
         },
         {
           "pattern": "business-partners",
@@ -117,12 +130,22 @@
         "courses": {
           "viewName": "Courses",
           "viewId": "courses",
-          "viewLevel": 2
+          "viewLevel": 1
         },
         "businessPartners": {
           "viewName": "BusinessPartners",
           "viewId": "businessPartners",
+          "viewLevel": 1
+        },
+        "studentDetail": {
+          "viewName": "StudentDetail",
+          "viewId": "studentDetail",
           "viewLevel": 2
+        },
+        "enrollments": {
+          "viewName": "Enrollments",
+          "viewId": "enrollments",
+          "viewLevel": 1
         }
       }
     }
